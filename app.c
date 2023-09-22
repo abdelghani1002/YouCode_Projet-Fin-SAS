@@ -52,9 +52,12 @@ typedef struct
 } Task;
 
 // Functions declaration
+int getIntInput();
 int getChoise();
 void addTask(int number);
+int searchByID();
 void displayTasks(int max_deadline);
+void displayTask(Task task);
 void sortByTitle();
 void sortByDeadline();
 
@@ -134,6 +137,7 @@ int main()
             {
             case 0:
                 printf("\t** menu principale !!\n");
+                break;
             case 1:
                 // sort by title
                 sortByTitle();
@@ -161,16 +165,37 @@ int main()
             break;
 
         case 6:
-            printf("Rechercher les taches");
-            break;
+        {
+            // switch search byId / byTitle 
 
+            int search_id;
+            while (1)
+            {
+                // get the input from user.
+                printf("\n\t\tSaisir l\'identifiant : ");
+                search_id = getIntInput();
+                // verify valide input
+                if (search_id < 1)
+                    printf("\n\t\t-- Saisie Invalide !! --\n");
+                else
+                    break;
+            }
+
+            int index = searchByID(search_id);
+            index != -1 ? displayTask(tasks[index]) : printf("No tache avec ce identifiant !\n");
+
+            break;
+        }
         case 7:
+        {
             printf("Statistiques");
             break;
-
+        }
         case 8:
+        {
             printf("Quitter");
             break;
+        }
         }
     }
 
@@ -286,6 +311,17 @@ void seeder()
 }
 
 // done
+int searchByID(int id)
+{
+    for (int i = 0; i < tasks_length - 1; i++)
+    {
+        if (tasks[i].id == id)
+            return i;
+    }
+    return -1;
+}
+
+// done
 void sortByDeadline()
 {
     int min_pos;
@@ -363,6 +399,39 @@ void sortByTitle()
      */
 }
 
+// doing
+void displayTask(Task task)
+{
+    char deadlineSTR[40], createdAtSTR[40];
+    int day, hour, min;
+
+    // Format date
+    strftime(deadlineSTR, 40, "%m/%d/%Y %H:%M:%S", &(task.deadline));
+    strftime(createdAtSTR, 40, "%m/%d/%Y %H:%M:%S", &(task.created_at));
+
+    // deadAfter
+    time_t current_t = time(NULL);
+    time_t inDead = mktime(&task.deadline);
+
+    long long int deadAfter = inDead - current_t;
+
+    // Time representation
+    day = (int)(deadAfter / (3600 * 24));
+    hour = (int)((deadAfter % (3600 * 24)) / 3600);
+    min = (int)((deadAfter % (3600)) / 60);
+
+    printf("\n\t\tid         : %d"
+           "\n\t\ttitle      : %s"
+           "\n\t\tdesc       : %s"
+           "\n\t\tstatut     : %s"
+           "\n\t\tdeadline   : %s"
+           "\n\t\tcreated at : %s"
+           "\n\t\tdead after : %d jours %d heurs %d min"
+           "\n\t\t\t_______________________\n",
+           task.id, task.title, task.description,
+           task.status, deadlineSTR, createdAtSTR, day, hour, min);
+}
+
 // done
 void displayTasks(int max_deadline_days)
 {
@@ -397,12 +466,9 @@ void displayTasks(int max_deadline_days)
                    "\n\t\tdead after : %d jours %d heurs %d min"
                    "\n\t\t\t_______________________\n",
                    tasks[i].id, tasks[i].title, tasks[i].description,
-                   tasks[i].status, deadlineSTR, createdAtSTR, day,
-                   hour, min);
-            continue;
+                   tasks[i].status, deadlineSTR, createdAtSTR, day, hour, min);
         }
-
-        if (deadAfter <= (max_deadline_days * 24 * 3600))
+        else if (deadAfter <= (max_deadline_days * 24 * 3600))
         {
             printf("\n\t\tid         : %d"
                    "\n\t\ttitle      : %s"
@@ -541,7 +607,17 @@ int getChoise()
                "\n\tTapez votre choix [0-8] : ");
 
         // get the input from user.
-        fgets(input, sizeof(input), stdin);
+        choise = getIntInput();
+        if (choise != 404 && choise >= 1 && choise <= 8)
+        {
+            break;
+        }
+        else
+        {
+            printf("\n\t\t-- Saisie Invalide !! --");
+        }
+
+        /* fgets(input, sizeof(input), stdin);
         int len = strlen(input);
         if (input[len - 1] == '\n')
             input[len - 1] = '\0';
@@ -550,10 +626,27 @@ int getChoise()
         if (!sscanf(input, "%d", &choise) || (choise < 1 || choise > 8))
             printf("\n\t\t-- Choix Invalide !! --");
         else
-            break;
+            break; */
     };
 
     return choise;
+}
+
+// done
+int getIntInput()
+{
+    char input[10];
+    int choise;
+    fgets(input, sizeof(input), stdin);
+    int len = strlen(input);
+    if (input[len - 1] == '\n')
+        input[len - 1] = '\0';
+
+    // verify valide input
+    if (sscanf(input, "%d", &choise))
+        return choise;
+    else
+        return 404;
 }
 
 // some things to return to
