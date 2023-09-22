@@ -82,7 +82,8 @@ int main()
         printf("\n !!!!!!!!!!!!!! Server error !!!!!!!!!!!!!\n");
     };
 
-    seeder();
+    seeder(); // data fir testing
+
     while (choise != 8)
     {
         choise = getChoise();
@@ -117,18 +118,22 @@ int main()
             printf("\n\t L\'affichage par :\n"
                    "\t\t\t 1 - Order alphabetique\n"
                    "\t\t\t 2 - Par deadline\n"
-                   "\t\t\t 3 - Taches dont le deadline est dans 3 jours ou moins.\n");
+                   "\t\t\t 3 - Taches dont le deadline est dans 3 jours ou moins.\n"
+                   "\t\t\t 0 - Menu principale.\n");
             while (1)
             {
                 printf("\n\t\t\t --> Tapez votre choix [1-3] : ");
                 scanf("%d", &sortmethod);
-                if (sortmethod >= 1 && sortmethod <= 3)
+                if (sortmethod >= 0 && sortmethod <= 3)
                     break;
                 else
                     printf("\n !! choix invalide !!! \n");
-            };
+            }
+
             switch (sortmethod)
             {
+            case 0:
+                printf("\t** menu principale !!\n");
             case 1:
                 // sort by title
                 sortByTitle();
@@ -145,13 +150,8 @@ int main()
                 // dead line de 3 jours ou moin
                 displayTasks(3);
                 break;
-
-            default:
-                printf("\n Triage choix Invalide");
             }
-
             break;
-
         case 4:
             printf("Modifier une tache");
             break;
@@ -174,17 +174,18 @@ int main()
         }
     }
 
+    // free pointer
+    free(tasks);
+
     // Quit
     printf("\n\t A bientot.");
 
-    // free pointer
-    free(tasks);
     return 0;
 }
 
 // Functions definition
 
-// done if you want haha
+// done
 void seeder()
 {
     char str[13];
@@ -284,7 +285,7 @@ void seeder()
     tasks[3].created_at.tm_sec = 55;
 }
 
-//done
+// done
 void sortByDeadline()
 {
     int min_pos;
@@ -362,7 +363,7 @@ void sortByTitle()
      */
 }
 
-//done
+// done
 void displayTasks(int max_deadline_days)
 {
     for (int i = 0; i < tasks_length - 1; i++)
@@ -397,8 +398,7 @@ void displayTasks(int max_deadline_days)
                    "\n\t\t\t_______________________\n",
                    tasks[i].id, tasks[i].title, tasks[i].description,
                    tasks[i].status, deadlineSTR, createdAtSTR, day,
-                   hour, min
-            );
+                   hour, min);
             continue;
         }
 
@@ -433,9 +433,8 @@ void addTask(int number)
         {
             printf("\n\t\t Ajouter tache %d: \n \t\t\t Saisir titre : ", i + 1);
             fgets(title, sizeof(title), stdin);
-            int len = strlen(title);
             if (strlen(title) > 0)
-                title[len - 1] = '\0';
+                title[strlen(title) - 1] = '\0';
             else
                 printf("title invalide !");
         } while (strlen(title) <= 4);
