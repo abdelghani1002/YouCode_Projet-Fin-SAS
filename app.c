@@ -49,13 +49,12 @@ typedef struct
     struct tm deadline;
     char status[24];
     struct tm created_at;
-    long long int deadAfter;
 } Task;
 
 // Functions declaration
 int getChoise();
-void addTask();
-void displayTasks();
+void addTask(int number);
+void displayTasks(int max_deadline);
 void sortByTitle();
 void sortByDeadline();
 
@@ -94,7 +93,6 @@ int main()
             addTask(1);
             break;
 
-
         case 2:
             int newTasks_number;
             do
@@ -107,8 +105,7 @@ int main()
             addTask(newTasks_number);
             break;
 
-
-        case 3: 
+        case 3:
             // if tasks is empty
             if (tasks_length - 1 == 0)
             {
@@ -135,43 +132,41 @@ int main()
             case 1:
                 // sort by title
                 sortByTitle();
+                displayTasks(0);
                 break;
 
             case 2:
                 // sort by deadline
                 sortByDeadline();
+                displayTasks(0);
                 break;
 
             case 3:
-
-                printf("\n\t\t deadline est dans 3 jours ou moins.");
+                // dead line de 3 jours ou moin
+                displayTasks(3);
                 break;
 
             default:
                 printf("\n Triage choix Invalide");
             }
-            displayTasks();
+
             break;
 
         case 4:
             printf("Modifier une tache");
             break;
 
-
         case 5:
             printf("Supprimer une donnee par identifiant");
             break;
-
 
         case 6:
             printf("Rechercher les taches");
             break;
 
-
         case 7:
             printf("Statistiques");
             break;
-
 
         case 8:
             printf("Quitter");
@@ -189,105 +184,130 @@ int main()
 
 // Functions definition
 
+// done if you want haha
 void seeder()
 {
-    // task 1
+    char str[13];
+    time_t t = time(NULL);
+    struct tm currentTime = *localtime(&t);
 
+    // task 1
     tasks[0].id = 3;
     strcpy(tasks[0].title, "task : a week up");
     strcpy(tasks[0].description, "description task 3");
+
     tasks[0].deadline.tm_year = 2023 - 1900;
     tasks[0].deadline.tm_mon = 9 - 1;
-    tasks[0].deadline.tm_mday = 25;
+    tasks[0].deadline.tm_mday = 22;
+
+    tasks[0].deadline.tm_hour = 17;
+    tasks[0].deadline.tm_min = 35;
+    tasks[0].deadline.tm_sec = 25;
+
     strcpy(tasks[0].status, "A realiser");
+
     tasks[0].created_at.tm_year = 2023 - 1900;
     tasks[0].created_at.tm_mon = 9 - 1;
     tasks[0].created_at.tm_mday = 21;
 
-    time_t timeDead_0_inS = mktime(&tasks[0].deadline);
-    time_t timeCreate_0_inS = mktime(&tasks[0].created_at);
-    long long int diff_0_inS = (long long int)(timeDead_0_inS - timeCreate_0_inS);
-    printf("00000 diff time in S : %ld \n", diff_0_inS);
-    tasks[0].deadAfter = diff_0_inS;
-    printf("after %ld second.\n", tasks[0].deadAfter);
+    tasks[0].created_at.tm_hour = 12;
+    tasks[0].created_at.tm_min = 35;
+    tasks[0].created_at.tm_sec = 25;
 
     // task 2
-
     tasks[1].id = 2;
     strcpy(tasks[1].title, "task : C have breakfast");
     strcpy(tasks[1].description, "description task 2");
+
     tasks[1].deadline.tm_year = 2023 - 1900;
     tasks[1].deadline.tm_mon = 9 - 1;
-    tasks[1].deadline.tm_mday = 22;
+    tasks[1].deadline.tm_mday = 24;
+
+    tasks[1].deadline.tm_hour = 12;
+    tasks[1].deadline.tm_min = 35;
+    tasks[1].deadline.tm_sec = 25;
+
     strcpy(tasks[1].status, "En cours de realisation");
+
     tasks[1].created_at.tm_year = 2023 - 1900;
     tasks[1].created_at.tm_mon = 9 - 1;
     tasks[1].created_at.tm_mday = 21;
 
-    time_t timeDead_1_inS = mktime(&tasks[1].deadline);
-    time_t timeCreate_1_inS = mktime(&tasks[1].created_at);
-    long long int diff_1_inS = (long long int)(timeDead_1_inS - timeCreate_1_inS);
-    printf("11111 diff time in S : %ld \n", diff_1_inS);
-    tasks[1].deadAfter = diff_1_inS;
-    printf("dead after %ld second.\n", tasks[1].deadAfter);
+    tasks[1].created_at.tm_hour = 9;
+    tasks[1].created_at.tm_min = 45;
+    tasks[1].created_at.tm_sec = 25;
 
     // task3
-
     tasks[2].id = 4;
     strcpy(tasks[2].title, "task : A morning training");
     strcpy(tasks[2].description, "description task 4");
+
     tasks[2].deadline.tm_year = 2023 - 1900;
     tasks[2].deadline.tm_mon = 10 - 1;
     tasks[2].deadline.tm_mday = 7;
+
+    tasks[2].deadline.tm_hour = 12;
+    tasks[2].deadline.tm_min = 35;
+    tasks[2].deadline.tm_sec = 25;
+
     strcpy(tasks[2].status, "Finisee");
+
     tasks[2].created_at.tm_year = 2023 - 1900;
     tasks[2].created_at.tm_mon = 9 - 1;
     tasks[2].created_at.tm_mday = 29;
 
-    time_t timeDead_2_inS = mktime(&(tasks[2].deadline));
-    time_t timeCreate_2_inS = mktime(&tasks[2].created_at);
-    long long int diff_2_inS = (long long int)(timeDead_2_inS - timeCreate_2_inS);
-    printf("2222 diff time in S : %ld \n", diff_2_inS);
-    tasks[2].deadAfter = diff_2_inS;
-    printf("dead after %ld second.\n", tasks[2].deadAfter);
-
+    tasks[2].created_at.tm_hour = 22;
+    tasks[2].created_at.tm_min = 45;
+    tasks[2].created_at.tm_sec = 35;
 
     // task 4
-
     tasks[3].id = 1;
     strcpy(tasks[3].title, "task : c kassi kasaka");
     strcpy(tasks[3].description, "description task 1");
+
     tasks[3].deadline.tm_year = 2023 - 1900;
     tasks[3].deadline.tm_mon = 9 - 1;
     tasks[3].deadline.tm_mday = 23;
+
+    tasks[3].deadline.tm_hour = 12;
+    tasks[3].deadline.tm_min = 35;
+    tasks[3].deadline.tm_sec = 25;
+
     strcpy(tasks[3].status, "A realiser");
+
     tasks[3].created_at.tm_year = 2023 - 1900;
     tasks[3].created_at.tm_mon = 9 - 1;
     tasks[3].created_at.tm_mday = 21;
 
-    time_t timeDead_3_inS = mktime(&tasks[3].deadline);
-    time_t timeCreate_3_inS = mktime(&tasks[3].created_at);
-    long long int diff_3_inS = (long long int)(timeDead_3_inS - timeCreate_3_inS);
-    printf("3333 diff time in S : %ld \n", diff_3_inS);
-    tasks[3].deadAfter = diff_3_inS;
-    printf("dead after %ld second.\n", tasks[2].deadAfter);
+    tasks[3].created_at.tm_hour = 23;
+    tasks[3].created_at.tm_min = 45;
+    tasks[3].created_at.tm_sec = 55;
 }
 
+//done
 void sortByDeadline()
 {
     int min_pos;
     Task taskTMP;
+    time_t current_t = time(NULL);
+
     for (int i = 0; i < tasks_length - 2; i++)
     {
+        // task[i] deadAfter
+        long long int i_deadAfter = mktime(&tasks[i].deadline) - current_t;
+
         min_pos = i + 1;
+
         for (int j = i + 1; j < tasks_length - 1; j++)
         {
-            if (tasks[j].deadAfter < tasks[min_pos].deadAfter)
+            long long int j_deadAfter = mktime(&tasks[j].deadline) - current_t;
+            if (j_deadAfter < (mktime(&tasks[min_pos].deadline) - current_t))
             {
                 min_pos = j;
             }
         }
-        if (tasks[i].deadAfter > tasks[min_pos].deadAfter)
+
+        if (i_deadAfter > (mktime(&tasks[min_pos].deadline) - current_t))
         {
             memcpy(&taskTMP, &tasks[i], sizeof(Task));
             memcpy(&tasks[i], &tasks[min_pos], sizeof(Task));
@@ -296,6 +316,7 @@ void sortByDeadline()
     }
 }
 
+// done
 void sortByTitle()
 {
     int min_pos;
@@ -341,24 +362,60 @@ void sortByTitle()
      */
 }
 
-void displayTasks()
+//done
+void displayTasks(int max_deadline_days)
 {
     for (int i = 0; i < tasks_length - 1; i++)
     {
-        printf("\n\t\tid         : %d"
-               "\n\t\ttitle      : %s"
-               "\n\t\tdesc       : %s"
-               "\n\t\tstatut     : %s"
-               "\n\t\tdeadline   : %d/%02d/%02d"
-               "\n\t\tcreated at : %d/%02d/%02d"
-               "\n\t\tdead after : %ld jours"
-               "\n\t\t\t_______________________\n",
-               tasks[i].id, tasks[i].title, tasks[i].description,
-               tasks[i].status, tasks[i].deadline.tm_year + 1900,
-               tasks[i].deadline.tm_mon + 1, tasks[i].deadline.tm_mday,
-               tasks[i].created_at.tm_year + 1900, tasks[i].created_at.tm_mon + 1,
-               tasks[i].created_at.tm_mday, (int)(tasks[i].deadAfter / (3600*24))
-        );
+        char deadlineSTR[40], createdAtSTR[40];
+        int day, hour, min;
+
+        // Format date
+        strftime(deadlineSTR, 40, "%m/%d/%Y %H:%M:%S", &(tasks[i].deadline));
+        strftime(createdAtSTR, 40, "%m/%d/%Y %H:%M:%S", &(tasks[i].created_at));
+
+        // deadAfter
+        time_t current_t = time(NULL);
+        time_t inDead = mktime(&tasks[i].deadline);
+
+        long long int deadAfter = inDead - current_t;
+
+        // Time representation
+        day = (int)(deadAfter / (3600 * 24));
+        hour = (int)((deadAfter % (3600 * 24)) / 3600);
+        min = (int)((deadAfter % (3600)) / 60);
+
+        if (max_deadline_days == 0)
+        {
+            printf("\n\t\tid         : %d"
+                   "\n\t\ttitle      : %s"
+                   "\n\t\tdesc       : %s"
+                   "\n\t\tstatut     : %s"
+                   "\n\t\tdeadline   : %s"
+                   "\n\t\tcreated at : %s"
+                   "\n\t\tdead after : %d jours %d heurs %d min"
+                   "\n\t\t\t_______________________\n",
+                   tasks[i].id, tasks[i].title, tasks[i].description,
+                   tasks[i].status, deadlineSTR, createdAtSTR, day,
+                   hour, min
+            );
+            continue;
+        }
+
+        if (deadAfter <= (max_deadline_days * 24 * 3600))
+        {
+            printf("\n\t\tid         : %d"
+                   "\n\t\ttitle      : %s"
+                   "\n\t\tdesc       : %s"
+                   "\n\t\tstatut     : %s"
+                   "\n\t\tdeadline   : %s"
+                   "\n\t\tcreated at : %s"
+                   "\n\t\tdead after : %d jours %d heurs %d min"
+                   "\n\t\t\t_______________________\n",
+                   tasks[i].id, tasks[i].title, tasks[i].description,
+                   tasks[i].status, deadlineSTR, createdAtSTR, day,
+                   hour, min);
+        }
     }
 }
 
@@ -395,7 +452,7 @@ void addTask(int number)
                 printf("description invalide !");
         } while (strlen(description) <= 4);
 
-        // deadline
+        // deadline year month and day
         printf("\t\t\t Saisir deadline (YYYY/mm/dd) : ");
         scanf("%d/%02d/%02d", &year, &month, &day); // add do while
         deadline.tm_year = year - 1900;
@@ -408,27 +465,40 @@ void addTask(int number)
         // created_at
         time_t t = time(NULL);
         struct tm currentTime = *localtime(&t);
-        created_at.tm_year = currentTime.tm_year + 1900;
-        created_at.tm_mon = currentTime.tm_mon + 1;
+        created_at.tm_year = currentTime.tm_year;
+        created_at.tm_mon = currentTime.tm_mon;
         created_at.tm_mday = currentTime.tm_mday;
+        created_at.tm_hour = currentTime.tm_hour;
+        created_at.tm_min = currentTime.tm_min;
+        created_at.tm_sec = currentTime.tm_sec;
 
-        // deadAfter
-        time_t inCreate = mktime(&currentTime);
-        time_t inDead = mktime(&deadline);
-        long long int deadAfter = inDead - inCreate;
+        // deadline hour min and second
+        deadline.tm_hour = currentTime.tm_hour;
+        deadline.tm_min = currentTime.tm_min;
+        deadline.tm_sec = currentTime.tm_sec;
 
         // add new task to tasks array
-        tasks[tasks_length - 1].id = nextID;
-        strcpy(tasks[tasks_length - 1].title, title);
-        strcpy(tasks[tasks_length - 1].description, description);
-        tasks[tasks_length - 1].deadline.tm_year = deadline.tm_year;
+        tasks[tasks_length - 1].id = nextID; // ID
+
+        strcpy(tasks[tasks_length - 1].title, title); // Title
+
+        strcpy(tasks[tasks_length - 1].description, description); // Description
+
+        tasks[tasks_length - 1].deadline.tm_year = deadline.tm_year; // deadline
         tasks[tasks_length - 1].deadline.tm_mon = deadline.tm_mon;
         tasks[tasks_length - 1].deadline.tm_mday = deadline.tm_mday;
-        strcpy(tasks[tasks_length - 1].status, status);
-        tasks[tasks_length - 1].created_at.tm_year = created_at.tm_year;
+        tasks[tasks_length - 1].deadline.tm_hour = deadline.tm_hour;
+        tasks[tasks_length - 1].deadline.tm_min = deadline.tm_min;
+        tasks[tasks_length - 1].deadline.tm_sec = deadline.tm_sec;
+
+        strcpy(tasks[tasks_length - 1].status, status); // status
+
+        tasks[tasks_length - 1].created_at.tm_year = created_at.tm_year; // created at
         tasks[tasks_length - 1].created_at.tm_mon = created_at.tm_mon;
         tasks[tasks_length - 1].created_at.tm_mday = created_at.tm_mday;
-        tasks[tasks_length - 1].deadAfter = deadAfter;
+        tasks[tasks_length - 1].created_at.tm_hour = created_at.tm_hour;
+        tasks[tasks_length - 1].created_at.tm_min = created_at.tm_min;
+        tasks[tasks_length - 1].created_at.tm_sec = created_at.tm_sec;
 
         // Increment id
         nextID++;
