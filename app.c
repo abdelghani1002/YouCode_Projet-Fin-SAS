@@ -47,11 +47,14 @@ void sortByDeadline();
 void searchByTitle();
 int searchByID();
 int deleteTask();
+int getDoneTasksNumber();
+void displayDoneTasks();
+void displayNonDoneTasks();
 void seeder();
 
 /* Constances */
 
-/* Global variables */ 
+/* Global variables */
 int tasks_length = 5; // size of the tasks array
 int nextID = 5;       // generate an ID automatically
 Task *tasks;          // ** pointer to tasks array ** //
@@ -87,11 +90,15 @@ int main()
         case 2: // Add many Doing (a bug)
         {
             int newTasks_number;
-            do
+            while(1)
             {
-                printf("\n\t\t\t How many tasks that you want to add ? : ");
-                scanf("%d", &newTasks_number);
-            } while (newTasks_number <= 0);
+                printf("\n\t\t\t Combien de tâches vous voulez ajouter? : ");
+                newTasks_number = getIntInput();
+                if(newTasks_number < 1)
+                    printf("\t\nNombre Invalide !!\n");
+                else
+                    break;
+            }
 
             // Add many
             addTask(newTasks_number);
@@ -116,7 +123,7 @@ int main()
             while (1)
             {
                 printf("\n\t\t\t --> Tapez votre choix [0-3] : ");
-                scanf("%d", &sortmethod);
+                sortmethod = getIntInput();
                 if (sortmethod >= 0 && sortmethod <= 3)
                     break;
                 else
@@ -198,7 +205,7 @@ int main()
                         int len = strlen(newDescription);
                         if (len > 4)
                         {
-                            newDescription[len - 1] = '\0';
+                            if(newDescription[len - 1] == '\n') newDescription[len - 1] = '\0';
                             break;
                         }
                         else
@@ -298,7 +305,7 @@ int main()
             {
                 displayTask(tasks[index]);
                 char confirm;
-                printf("\n\t\tVoulez-vous vraiment supprimer cette tache? (y/n) : ");
+                printf("\n\t\tVoulez-vous vraiment supprimer cette tache ? (y/n) : ");
                 scanf("%c", &confirm);
 
                 // delete confirm
@@ -329,7 +336,7 @@ int main()
                 if (searchArg >= 0 && searchArg <= 2)
                     break;
                 else
-                    printf("\n\t\t!! Saisie Invalide !!\n");
+                    printf("\n\t\t!! Choix Invalide !!\n");
             }
 
             if (searchArg == 0)
@@ -356,9 +363,10 @@ int main()
                 {
                     printf("\n\t\t Saisir titre : ");
                     fgets(search_title, sizeof(search_title), stdin);
-                    if (strlen(search_title) > 2)
+                    int len = strlen(search_title);
+                    if (len > 2)
                     {
-                        search_title[strlen(search_title) - 1] = '\0';
+                        if(search_title[len - 1] == '\n') search_title[len - 1] = '\0';
                         break;
                     }
                     else
@@ -369,7 +377,6 @@ int main()
 
                 break;
             } // end case 6_2
-            
             }
 
             break;
@@ -377,9 +384,38 @@ int main()
 
         case 7: // Statistics ...
         {
-            printf("Statistiques");
-            
-            
+            int display_choise;
+            printf("\n\tNombre total des taches : %d"
+                   "\n\t\tTaches completes   : %d :)"
+                   "\n\t\tTaches incompletes : %d :( \n"
+                   "\n\t1. Afficher taches completes."
+                   "\n\t2. Afficher taches incompletes.\n"
+                   "\n\t0. Menu Principal.",
+                   tasks_length - 1, getDoneTasksNumber(), tasks_length - 1 - getDoneTasksNumber());
+
+            while (1)
+            {
+                printf("\n\tSaisir votre choix -> : ");
+                display_choise = getIntInput();
+                if (display_choise >= 0 && display_choise <= 2)
+                    break;
+                printf("\n\tChoix invalide !!\n");
+            }
+
+            if (display_choise == 0)
+                break; // go Menu
+
+            switch (display_choise)
+            {
+            case 1:
+                displayDoneTasks();
+                break;
+
+            case 2:
+                displayNonDoneTasks();
+                break;
+            }
+
             break;
         } // end case 7
 
@@ -442,7 +478,7 @@ void seeder()
     tasks[1].deadline.tm_min = 35;
     tasks[1].deadline.tm_sec = 25;
 
-    strcpy(tasks[1].status, "En cours de realisation");
+    strcpy(tasks[1].status, "finalisee");
 
     tasks[1].created_at.tm_year = 2023 - 1900;
     tasks[1].created_at.tm_mon = 9 - 1;
@@ -465,7 +501,7 @@ void seeder()
     tasks[2].deadline.tm_min = 35;
     tasks[2].deadline.tm_sec = 25;
 
-    strcpy(tasks[2].status, "Finisee");
+    strcpy(tasks[2].status, "finalisee");
 
     tasks[2].created_at.tm_year = 2023 - 1900;
     tasks[2].created_at.tm_mon = 9 - 1;
@@ -497,6 +533,38 @@ void seeder()
     tasks[3].created_at.tm_hour = 23;
     tasks[3].created_at.tm_min = 45;
     tasks[3].created_at.tm_sec = 55;
+}
+
+// done
+void displayDoneTasks()
+{
+    for (int i = 0; i < tasks_length - 1; i++)
+    {
+        if (stricmp(tasks[i].status, "finalisee") == 0)
+            displayTask(tasks[i]);
+    }
+}
+
+// done
+void displayNonDoneTasks()
+{
+    for (int i = 0; i < tasks_length - 1; i++)
+    {
+        if (stricmp(tasks[i].status, "finalisee") != 0)
+            displayTask(tasks[i]);
+    }
+}
+
+// done
+int getDoneTasksNumber()
+{
+    int number = 0;
+    for (int i = 0; i < tasks_length - 1; i++)
+    {
+        if (stricmp(tasks[i].status, "finalisee") == 0)
+            number++;
+    }
+    return number;
 }
 
 // done
@@ -698,27 +766,31 @@ void addTask(int number)
         struct tm deadline, created_at, currentTime = *localtime(&t);
 
         // title
-        do
+        while(1)
         {
-            printf("\n\t\t Ajouter tache %d: \n \t\t\t Saisir titre : ", i + 1);
+            printf("\n\t\t L\'ajoute de tache (%d): \n \t\t\t Saisir titre : ", i + 1);
             fgets(title, sizeof(title), stdin);
-            if (strlen(title) > 0)
-                title[strlen(title) - 1] = '\0';
+            if (strlen(title) > 0){
+                if(title[strlen(title) - 1] == '\n') title[strlen(title) - 1] = '\0';
+                break;
+            }
             else
                 printf("title invalide !");
-        } while (strlen(title) <= 4);
+        }
 
         // description
-        do
+        while(1)
         {
             printf("\t\t\t Saisir description : ");
             fgets(description, sizeof(description), stdin);
             int len = strlen(description);
-            if (len > 4)
-                description[len - 1] = '\0';
+            if (len > 4){
+                if(description[len - 1] == '\n') description[len - 1] = '\0';
+                break;
+            }
             else
-                printf("description invalide !");
-        } while (strlen(description) <= 4);
+                printf("\n\tDescription invalide !\n");
+        }
 
         // deadline year month and day
         printf("\t\t\t Saisir deadline (YYYY/mm/dd) : ");
@@ -812,12 +884,10 @@ int isIn_STR(char str1[], char str2[])
 // handle input
 int getChoise()
 {
-    char input[20];
     int choise = 0;
-
     while (1)
     {
-        printf("\n\n\t===============================================\n\t"
+        printf("\n\t===============================================\n\t"
                "\tMenu d\'application\n\t"
                "===============================================\n\t"
                "\t[1] Ajouter une tache\n\t"
@@ -857,7 +927,7 @@ int getIntInput()
         input[len - 1] = '\0';
 
     // verify valide input
-    if (sscanf(input, "%d", &choise))
+    if (sscanf(input, "%d", &choise) && choise >= 0)
         return choise;
     else
         return -1;
