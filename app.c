@@ -16,31 +16,15 @@
  *
  * Author: AIT TAMGHART Abdelghani
  * Date: 20/09/2023
- * ___________
- * [1] Ajouter une tache\n\t"
-[2] Ajouter plusieur taches\n\t"
-[3] Afficher la list de taches\n\t"
-[4] Modifier une tache\n\t"
-[5] Supprimer une donnee par identifiant\n\t"
-[6] Rechercher les taches\n\t"
-[7] Statistiques\n\t"
-[8] Quitter\n\t"
  */
 
-// Libraries
+/* Libraries */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
-// Structs
-/* typedef struct
-{
-    char fname[20];
-    char lname[20];
-    char email[30];
-} Collaborator; */
-
+/* Structs */
 typedef struct
 {
     int id;
@@ -51,32 +35,30 @@ typedef struct
     struct tm created_at;
 } Task;
 
-// Functions declaration
+/* Functions declaration */
 int getIntInput();
 int getChoise();
-void addTask();
-int searchByID();
-void searchByTitle();
 int isIn_STR();
+void addTask();
 void displayTask();
 void displayTasks();
 void sortByTitle();
 void sortByDeadline();
-
+void searchByTitle();
+int searchByID();
+int deleteTask();
 void seeder();
 
-// Constances
+/* Constances */
 
-// Global variables
+/* Global variables */ 
 int tasks_length = 5; // size of the tasks array
-int nextID = 5;       // id for generate an ID automatically
+int nextID = 5;       // generate an ID automatically
 Task *tasks;          // ** pointer to tasks array ** //
 
-// main
+/* main */
 int main()
 {
-    // DATA TEST
-
     int choise = 1;
 
     // allocate memory for the tasks pointer
@@ -87,7 +69,8 @@ int main()
         printf("\n !!!!!!!!!!!!!! Server error !!!!!!!!!!!!!\n");
     };
 
-    seeder(); // data fir testing
+    // Data for testing
+    seeder();
 
     while (choise != 8)
     {
@@ -95,7 +78,7 @@ int main()
         switch (choise)
         {
 
-        case 1: // Add one Done
+        case 1: // Add one (Done)
         {
             addTask(1);
             break;
@@ -115,7 +98,7 @@ int main()
             break;
         } // end case 2
 
-        case 3:  // diplay Done 
+        case 3: // Display (Done)
         {
             // if tasks is empty
             if (tasks_length - 1 == 0)
@@ -164,25 +147,178 @@ int main()
             }
             break;
         } // end case 3
-        
-        case 4:
+
+        case 4: // Update (Done)
         {
-            printf("Modifier une tache");
-            break;
+            // get Id and search for task match it.
+            int _id;
+            printf("\n\t\tSaisir l\'identifiant : ");
+            _id = getIntInput();
+            int index = searchByID(_id);
+            if (index == -1) // task not found
+                printf("\n\t\tNo tache avec ce identifiant.!!\n");
 
+            else // task exist
+            {
+                int arg_number;
+                printf("\t\t\t Choisir critere : \n"
+                       "\t\t\t\t   1. Description.\n"
+                       "\t\t\t\t   2. Statut.\n"
+                       "\t\t\t\t   3. Deadline\n"
+                       "\t\t\t\t   0. Menu principale\n");
+                while (1)
+                {
+                    printf("\t\t\t --> : ");
+                    arg_number = getIntInput();
+                    if (!(arg_number >= 0 && arg_number <= 3))
+                    {
+                        printf("\n\t\tChoix Invalide !!\n");
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                if (arg_number == 0)
+                { // go menu
+                    break;
+                }
+
+                switch (arg_number)
+                {
+                case 1: // Update description (Done)
+                {
+                    char newDescription[200];
+
+                    while (1)
+                    {
+                        printf("\n\t\t Saisir la nouvelle description  : ");
+                        fgets(newDescription, sizeof(newDescription), stdin);
+                        int len = strlen(newDescription);
+                        if (len > 4)
+                        {
+                            newDescription[len - 1] = '\0';
+                            break;
+                        }
+                        else
+                            printf("\n\tDescription invalide !\n");
+                    }
+
+                    strcpy(tasks[index].description, newDescription);
+                    printf("\n\tDescription modifié avec succese.\n");
+                    break;
+                } // end case 4_1
+
+                case 2: // Update status (Done)
+                {
+                    int status_number;
+                    printf("\n\t\tStatut : "
+                           "\n\t\t\t 1. A realisee."
+                           "\n\t\t\t 2. En cours de realisation."
+                           "\n\t\t\t 3. Finalisee."
+                           "\n\t\t\t 0. Menu principale.");
+
+                    while (1)
+                    {
+                        printf("\n\t\t\t \t\tChoisir statut : ");
+                        status_number = getIntInput();
+                        if (!(status_number >= 0 && status_number <= 3))
+                            printf("\nSaisie invalide !!\n");
+                        else
+                        {
+                            break;
+                        }
+                    }
+
+                    if (status_number == 0)
+                    {
+                        break; // go menu update
+                    }
+
+                    switch (status_number)
+                    {
+                    case 1:
+                        strcpy(tasks[index].status, "A realiser");
+                        break;
+
+                    case 2:
+                        strcpy(tasks[index].status, "En cours de realisation");
+                        break;
+
+                    case 3:
+                        strcpy(tasks[index].status, "Finalisee");
+                        break;
+                    }
+
+                    printf("\n\tStatut modifie avec succese.\n");
+                    break;
+
+                } // end case 4_2
+
+                case 3: // Update deadline (Done)
+                {
+                    // harry up !!
+                    char newDeadlineSTR[40];
+                    int year, month, day;
+                    time_t t = time(NULL);
+                    struct tm newDeadline, created_at, currentTime = *localtime(&t);
+
+                    // deadline year month and day
+                    printf("\t\t\t Saisir newDeadline (YYYY/mm/dd) : ");
+                    scanf("%d/%02d/%02d", &year, &month, &day); // add do while
+                    tasks[index].deadline.tm_year = year - 1900;
+                    tasks[index].deadline.tm_mon = month - 1;
+                    tasks[index].deadline.tm_mday = day;
+                    tasks[index].deadline.tm_hour = currentTime.tm_hour;
+                    tasks[index].deadline.tm_min = currentTime.tm_min;
+                    tasks[index].deadline.tm_sec = currentTime.tm_sec;
+                    strftime(newDeadlineSTR, 40, "%m/%d/%Y %H:%M:%S", &tasks[index].deadline);
+                    printf("\n\t\t\tDeadline modifie avec succesee.\n");
+                    break;
+                } // end case 4_3
+
+                } /* end Update switch */
+            }
+
+            break;
         }
-        
-        case 5:
+
+        case 5: // Delete (Done)
         {
-            printf("Supprimer une donnee par identifiant");
+            // get Id and search for task with that id.
+            int _id;
+            printf("\n\t\tSaisir l\'identifiant : ");
+            _id = getIntInput();
+            int index = searchByID(_id);
+            if (index == -1) // task not found
+                printf("\n\t\tNo tache avec ce identifiant.!!\n");
+
+            else // task exist
+            {
+                displayTask(tasks[index]);
+                char confirm;
+                printf("\n\t\tVoulez-vous vraiment supprimer cette tache? (y/n) : ");
+                scanf("%c", &confirm);
+
+                // delete confirm
+                if (confirm != 'y' && confirm != 'Y')
+                {
+                    printf("\n\t\tL\'opration est annulee avec succes.\n");
+                    break;
+                }
+                if (deleteTask(index))
+                    printf("\n\t\tTache supprimes avec succes.\n");
+                else
+                    printf("\n\t\tErreur !! .\n");
+            }
             break;
+        } // end case 5
 
-        }
-
-        case 6: // Search Done
+        case 6: // Search (Done)
         {
             int searchArg;
-            printf("\n\tChoisir critère de recherche :"
+            printf("\n\tChoisir critere de recherche :"
                    "\n\t\t 1. Rechercher par identifiant."
                    "\n\t\t 2. Rechercher par titre."
                    "\n\t\t 0. Menu principale.");
@@ -233,19 +369,23 @@ int main()
 
                 break;
             } // end case 6_2
+            
             }
+
             break;
         } // End case 6
 
-        case 7:
+        case 7: // Statistics ...
         {
             printf("Statistiques");
+            
+            
             break;
-        }
+        } // end case 7
 
-        case 8:
+        case 8: // Exit (Done)
         {
-            printf("Quitter");
+            printf("\n\t\t A bientot.\n");
             break;
         }
 
@@ -255,14 +395,10 @@ int main()
     // free pointer
     free(tasks);
 
-    // Quit
-    printf("\n\t A bientot.");
-
     return 0;
 }
 
-// Functions definition
-
+/* Functions definition */
 // done
 void seeder()
 {
@@ -271,7 +407,7 @@ void seeder()
     struct tm currentTime = *localtime(&t);
 
     // task 1
-    tasks[0].id = 3;
+    tasks[0].id = 1;
     strcpy(tasks[0].title, "task : a week up");
     strcpy(tasks[0].description, "description task 3");
 
@@ -317,7 +453,7 @@ void seeder()
     tasks[1].created_at.tm_sec = 25;
 
     // task3
-    tasks[2].id = 4;
+    tasks[2].id = 3;
     strcpy(tasks[2].title, "task : A morning training");
     strcpy(tasks[2].description, "description task 4");
 
@@ -340,7 +476,7 @@ void seeder()
     tasks[2].created_at.tm_sec = 35;
 
     // task 4
-    tasks[3].id = 1;
+    tasks[3].id = 4;
     strcpy(tasks[3].title, "task : c kassi kasaka");
     strcpy(tasks[3].description, "description task 1");
 
@@ -364,6 +500,25 @@ void seeder()
 }
 
 // done
+int deleteTask(int index)
+{
+    for (int i = index + 1; i < tasks_length; i++)
+    {
+        memcpy(&tasks[i - 1], &tasks[i], sizeof(Task));
+    }
+
+    tasks_length--;
+
+    tasks = (Task *)realloc(tasks, tasks_length * sizeof(Task));
+    if (!tasks)
+    {
+        printf("\n !!!!!!!!!!!!!! Server error !!!!!!!!!!!!!\n");
+        return 0;
+    }
+    return 1;
+}
+
+// done
 int searchByID(int id)
 {
     for (int i = 0; i < tasks_length - 1; i++)
@@ -374,7 +529,7 @@ int searchByID(int id)
     return -1;
 }
 
-// doing
+// done
 void searchByTitle(char search_title[20])
 {
     int matched = 0;
@@ -388,32 +543,6 @@ void searchByTitle(char search_title[20])
     }
     if (matched == 0)
         printf("\n\t\tNo tache avec ce titre.");
-}
-
-// done
-int isIn_STR(char str1[], char str2[])
-{
-    int itIs = 0;
-    for (int i = 0; i < strlen(str1); i++)
-    {
-        if (str1[i] == str2[0])
-        {
-            int k = i + 1;
-            itIs = 1;
-            for (int j = 1; j < strlen(str2); j++)
-            {
-                if (str2[j] != str1[k])
-                {
-                    itIs = 0;
-                    break;
-                }
-                k++;
-            }
-            if (itIs)
-                return itIs;
-        }
-    }
-    return itIs;
 }
 
 // done
@@ -470,61 +599,6 @@ void sortByTitle()
             memcpy(&tasks[min_pos], &taskTMP, sizeof(Task));
         }
     }
-
-    /*
-    for (int i = 0; i < 9; i++)
-    {
-        min_pos = i + 1;
-        for (int j = i + 1; j < 10; j++)
-        {
-            if (myArray[j] < myArray[min_pos])
-            {
-                min_pos = j;
-            }
-        }
-        // change the first element that loop(i) starts with, with value of min if its less
-        printf("\n ******* i = %d : min = %d\n", i, myArray[min_pos]);
-        if (myArray[i] > myArray[min_pos])
-        {
-            myArray[i] = myArray[i] + myArray[min_pos];
-            myArray[min_pos] = myArray[i] - myArray[min_pos];
-            myArray[i] = myArray[i] - myArray[min_pos];
-        }
-    }
-     */
-}
-
-// doing
-void displayTask(Task task)
-{
-    char deadlineSTR[40], createdAtSTR[40];
-    int day, hour, min;
-
-    // Format date
-    strftime(deadlineSTR, 40, "%m/%d/%Y %H:%M:%S", &(task.deadline));
-    strftime(createdAtSTR, 40, "%m/%d/%Y %H:%M:%S", &(task.created_at));
-
-    // deadAfter
-    time_t current_t = time(NULL);
-    time_t inDead = mktime(&task.deadline);
-
-    long long int deadAfter = inDead - current_t;
-
-    // Time representation
-    day = (int)(deadAfter / (3600 * 24));
-    hour = (int)((deadAfter % (3600 * 24)) / 3600);
-    min = (int)((deadAfter % (3600)) / 60);
-
-    printf("\n\t\tid         : %d"
-           "\n\t\ttitle      : %s"
-           "\n\t\tdesc       : %s"
-           "\n\t\tstatut     : %s"
-           "\n\t\tdeadline   : %s"
-           "\n\t\tcreated at : %s"
-           "\n\t\tdead after : %d jours %d heurs %d min"
-           "\n\t\t\t_______________________\n",
-           task.id, task.title, task.description,
-           task.status, deadlineSTR, createdAtSTR, day, hour, min);
 }
 
 // done
@@ -580,6 +654,39 @@ void displayTasks(int max_deadline_days)
     }
 }
 
+// done
+void displayTask(Task task)
+{
+    char deadlineSTR[40], createdAtSTR[40];
+    int day, hour, min;
+
+    // Format date
+    strftime(deadlineSTR, 40, "%m/%d/%Y %H:%M:%S", &(task.deadline));
+    strftime(createdAtSTR, 40, "%m/%d/%Y %H:%M:%S", &(task.created_at));
+
+    // deadAfter
+    time_t current_t = time(NULL);
+    time_t inDead = mktime(&task.deadline);
+
+    long long int deadAfter = inDead - current_t;
+
+    // Time representation
+    day = (int)(deadAfter / (3600 * 24));
+    hour = (int)((deadAfter % (3600 * 24)) / 3600);
+    min = (int)((deadAfter % (3600)) / 60);
+
+    printf("\n\t\tid         : %d"
+           "\n\t\ttitle      : %s"
+           "\n\t\tdesc       : %s"
+           "\n\t\tstatut     : %s"
+           "\n\t\tdeadline   : %s"
+           "\n\t\tcreated at : %s"
+           "\n\t\tdead after : %d jours %d heurs %d min"
+           "\n\t\t\t_______________________\n",
+           task.id, task.title, task.description,
+           task.status, deadlineSTR, createdAtSTR, day, hour, min);
+}
+
 // handle input
 void addTask(int number)
 {
@@ -587,7 +694,8 @@ void addTask(int number)
     {
         int year = 0, month = 0, day = 0;
         char title[40], description[200], status[24];
-        struct tm deadline, created_at;
+        time_t t = time(NULL);
+        struct tm deadline, created_at, currentTime = *localtime(&t);
 
         // title
         do
@@ -618,24 +726,20 @@ void addTask(int number)
         deadline.tm_year = year - 1900;
         deadline.tm_mon = month - 1;
         deadline.tm_mday = day;
+        deadline.tm_hour = currentTime.tm_hour;
+        deadline.tm_min = currentTime.tm_min;
+        deadline.tm_sec = currentTime.tm_sec;
 
         // status 'to do' by default
         strcpy(status, "A realiser");
 
-        // created_at
-        time_t t = time(NULL);
-        struct tm currentTime = *localtime(&t);
+        // Created at
         created_at.tm_year = currentTime.tm_year;
         created_at.tm_mon = currentTime.tm_mon;
         created_at.tm_mday = currentTime.tm_mday;
         created_at.tm_hour = currentTime.tm_hour;
         created_at.tm_min = currentTime.tm_min;
         created_at.tm_sec = currentTime.tm_sec;
-
-        // deadline hour min and second
-        deadline.tm_hour = currentTime.tm_hour;
-        deadline.tm_min = currentTime.tm_min;
-        deadline.tm_sec = currentTime.tm_sec;
 
         // add new task to tasks array
         tasks[tasks_length - 1].id = nextID; // ID
@@ -679,6 +783,32 @@ void addTask(int number)
     number == 1 ? printf("\n\t\t\tTask is added successfully.\n") : printf("\n\t\t\tTasks is added successfully.\n");
 }
 
+// done
+int isIn_STR(char str1[], char str2[])
+{
+    int itIs = 0;
+    for (int i = 0; i < strlen(str1); i++)
+    {
+        if (str1[i] == str2[0])
+        {
+            int k = i + 1;
+            itIs = 1;
+            for (int j = 1; j < strlen(str2); j++)
+            {
+                if (str2[j] != str1[k])
+                {
+                    itIs = 0;
+                    break;
+                }
+                k++;
+            }
+            if (itIs)
+                return itIs;
+        }
+    }
+    return itIs;
+}
+
 // handle input
 int getChoise()
 {
@@ -703,7 +833,7 @@ int getChoise()
 
         // get the input from user.
         choise = getIntInput();
-        if (choise != 404 && choise >= 1 && choise <= 8)
+        if (choise != -1 && choise >= 1 && choise <= 8)
         {
             break;
         }
@@ -711,17 +841,6 @@ int getChoise()
         {
             printf("\n\t\t-- Saisie Invalide !! --");
         }
-
-        /* fgets(input, sizeof(input), stdin);
-        int len = strlen(input);
-        if (input[len - 1] == '\n')
-            input[len - 1] = '\0';
-
-        // verify valide input
-        if (!sscanf(input, "%d", &choise) || (choise < 1 || choise > 8))
-            printf("\n\t\t-- Choix Invalide !! --");
-        else
-            break; */
     };
 
     return choise;
@@ -741,54 +860,5 @@ int getIntInput()
     if (sscanf(input, "%d", &choise))
         return choise;
     else
-        return 404;
+        return -1;
 }
-
-// some things to return to
-/*
-            printf("\t\t\t Statut : \n"
-                    "\t\t\t\t   1. A realiser\n"
-                    "\t\t\t\t   2. En cours de realisation\n"
-                    "\t\t\t\t   3. Finalisee\n"
-                    "\t\t\t\t   \t\tChoisir statut : "
-                    );
-
-            scanf("%d", &status_number);   // add do while
-            // add do while
-
-            switch (status_number)
-            {
-            case 1:
-                strcpy(status, "A realiser");
-                printf("\n --> Statut : %s", status);
-                break;
-
-            case 2:
-                strcpy(status, "En cours de realisation");
-                printf("\n --> Statut : %s", status);
-                break;
-
-            case 3:
-                strcpy(status, "Finalisee");
-                printf("\n --> Statut : %s", status);
-                break;
-
-            default :
-                printf("default switch status number");
-            }
-            __________________________________________________________
-
-Task newTask;
-        newTask.id = nextID;
-        strcpy(newTask.title, title);
-        strcpy(newTask.description, description);
-        newTask.deadline.tm_year = deadline.tm_year;
-        newTask.deadline.tm_mon = deadline.tm_mon;
-        newTask.deadline.tm_mday = deadline.tm_mday;
-        strcpy(newTask.status, status);
-        newTask.created_at.tm_year = created_at.tm_year;
-        newTask.created_at.tm_mon = created_at.tm_mon;
-        newTask.created_at.tm_mday = created_at.tm_mday;
-
-
-*/
