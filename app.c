@@ -54,10 +54,12 @@ typedef struct
 // Functions declaration
 int getIntInput();
 int getChoise();
-void addTask(int number);
+void addTask();
 int searchByID();
-void displayTasks(int max_deadline);
-void displayTask(Task task);
+void searchByTitle();
+int isIn_STR();
+void displayTask();
+void displayTasks();
 void sortByTitle();
 void sortByDeadline();
 
@@ -92,12 +94,15 @@ int main()
         choise = getChoise();
         switch (choise)
         {
-        case 1:
-            // Add one
+
+        case 1: // Add one Done
+        {
             addTask(1);
             break;
+        }
 
-        case 2:
+        case 2: // Add many Doing (a bug)
+        {
             int newTasks_number;
             do
             {
@@ -108,8 +113,10 @@ int main()
             // Add many
             addTask(newTasks_number);
             break;
+        } // end case 2
 
-        case 3:
+        case 3:  // diplay Done 
+        {
             // if tasks is empty
             if (tasks_length - 1 == 0)
             {
@@ -119,13 +126,13 @@ int main()
             // if is not
             int sortmethod;
             printf("\n\t L\'affichage par :\n"
-                   "\t\t\t 1 - Order alphabetique\n"
-                   "\t\t\t 2 - Par deadline\n"
-                   "\t\t\t 3 - Taches dont le deadline est dans 3 jours ou moins.\n"
-                   "\t\t\t 0 - Menu principale.\n");
+                   "\t\t 1 - Order alphabetique\n"
+                   "\t\t 2 - Par deadline\n"
+                   "\t\t 3 - Taches dont le deadline est dans 3 jours ou moins.\n"
+                   "\t\t 0 - Menu principale.\n");
             while (1)
             {
-                printf("\n\t\t\t --> Tapez votre choix [1-3] : ");
+                printf("\n\t\t\t --> Tapez votre choix [0-3] : ");
                 scanf("%d", &sortmethod);
                 if (sortmethod >= 0 && sortmethod <= 3)
                     break;
@@ -133,11 +140,11 @@ int main()
                     printf("\n !! choix invalide !!! \n");
             }
 
+            if (sortmethod == 0)
+                break;
+
             switch (sortmethod)
             {
-            case 0:
-                printf("\t** menu principale !!\n");
-                break;
             case 1:
                 // sort by title
                 sortByTitle();
@@ -156,47 +163,93 @@ int main()
                 break;
             }
             break;
+        } // end case 3
+        
         case 4:
+        {
             printf("Modifier une tache");
             break;
 
+        }
+        
         case 5:
+        {
             printf("Supprimer une donnee par identifiant");
             break;
 
-        case 6:
-        {
-            // switch search byId / byTitle 
+        }
 
-            int search_id;
+        case 6: // Search Done
+        {
+            int searchArg;
+            printf("\n\tChoisir critère de recherche :"
+                   "\n\t\t 1. Rechercher par identifiant."
+                   "\n\t\t 2. Rechercher par titre."
+                   "\n\t\t 0. Menu principale.");
             while (1)
             {
-                // get the input from user.
-                printf("\n\t\tSaisir l\'identifiant : ");
-                search_id = getIntInput();
-                // verify valide input
-                if (search_id < 1)
-                    printf("\n\t\t-- Saisie Invalide !! --\n");
-                else
+                printf("\n\t\t--> Tapez votre choix : ");
+                searchArg = getIntInput();
+                if (searchArg >= 0 && searchArg <= 2)
                     break;
+                else
+                    printf("\n\t\t!! Saisie Invalide !!\n");
             }
 
-            int index = searchByID(search_id);
-            index != -1 ? displayTask(tasks[index]) : printf("No tache avec ce identifiant !\n");
+            if (searchArg == 0)
+                break;
 
+            switch (searchArg)
+            {
+            case 1: // Search by ID
+            {
+                int search_id;
+                printf("\n\t\tSaisir l\'identifiant : ");
+                search_id = getIntInput();
+
+                int index = searchByID(search_id);
+                index != -1 ? displayTask(tasks[index]) : printf("\n\tNo tache avec ce identifiant !\n");
+                break;
+
+            } // end case 6_1
+
+            case 2: // Search by Title
+            {
+                char search_title[20];
+                while (1)
+                {
+                    printf("\n\t\t Saisir titre : ");
+                    fgets(search_title, sizeof(search_title), stdin);
+                    if (strlen(search_title) > 2)
+                    {
+                        search_title[strlen(search_title) - 1] = '\0';
+                        break;
+                    }
+                    else
+                        printf("Saisie invalide !");
+                }
+
+                searchByTitle(search_title);
+
+                break;
+            } // end case 6_2
+            }
             break;
-        }
+        } // End case 6
+
         case 7:
         {
             printf("Statistiques");
             break;
         }
+
         case 8:
         {
             printf("Quitter");
             break;
         }
-        }
+
+        } // end switch
     }
 
     // free pointer
@@ -319,6 +372,48 @@ int searchByID(int id)
             return i;
     }
     return -1;
+}
+
+// doing
+void searchByTitle(char search_title[20])
+{
+    int matched = 0;
+    for (int i = 0; i < tasks_length - 1; i++)
+    {
+        if (isIn_STR(tasks[i].title, search_title))
+        {
+            displayTask(tasks[i]);
+            matched++;
+        }
+    }
+    if (matched == 0)
+        printf("\n\t\tNo tache avec ce titre.");
+}
+
+// done
+int isIn_STR(char str1[], char str2[])
+{
+    int itIs = 0;
+    for (int i = 0; i < strlen(str1); i++)
+    {
+        if (str1[i] == str2[0])
+        {
+            int k = i + 1;
+            itIs = 1;
+            for (int j = 1; j < strlen(str2); j++)
+            {
+                if (str2[j] != str1[k])
+                {
+                    itIs = 0;
+                    break;
+                }
+                k++;
+            }
+            if (itIs)
+                return itIs;
+        }
+    }
+    return itIs;
 }
 
 // done
