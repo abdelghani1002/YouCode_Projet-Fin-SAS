@@ -37,13 +37,15 @@ typedef struct
 } Task;
 
 /* Functions declaration */
+int saveTasks();
 int isNumber();
 int getIntInput();
 int getChoise();
 int isIn_STR();
-void addTask();
-void displayTask();
-void displayTasks();
+int addTask();
+int updateTask();
+int displayTask();
+int displayTasks();
 void sortByTitle();
 void sortByDeadline();
 void searchByTitle();
@@ -71,7 +73,7 @@ int main()
     if (!tasks)
     {
         // something to exit program
-        printf("\n !!!!!!!!!!!!!! Server error !!!!!!!!!!!!!\n");
+        printf("\n\033[31m !!!!!!!!!!!!!! Server error !!!!!!!!!!!!! \033[0m\n");
     };
 
     // Data for testing
@@ -82,10 +84,14 @@ int main()
         choise = getChoise();
         switch (choise)
         {
-
         case 1: // Add one (Done)
         {
-            addTask(1);
+            if (addTask(1))
+            {
+                printf("\n\t\t\033[32mTache est ajoutee avec succes.\033[0m\n");
+            }
+            else
+                printf("\033[31m\n\t\t\t-- Erreur lors de l\'ajout de la tache !! --\n\033[0m\n");
             break;
         }
 
@@ -97,13 +103,18 @@ int main()
                 printf("\n\t Combien de taches vous voulez ajouter ? : ");
                 newTasks_number = getIntInput();
                 if (newTasks_number < 1)
-                    printf("\033[31m\n\t\t\t-- Nombre Invalide !! --\n\033[0m\n");
+                    printf("\033[31m\n\t\t\t-- Nombre Invalide !! --\033[0m\n");
                 else
                     break;
             }
 
-            // Add many
-            addTask(newTasks_number);
+            if (addTask(newTasks_number))
+            {
+                printf("\n\t\t\033[32mTaches sont ajoutees avec succes.\033[0m\n");
+            }
+            else
+                printf("\033[31m\n\t\t\t-- Erreur lors de l\'ajout des taches !! --\n\033[0m\n");
+
             break;
         } // end case 2
 
@@ -113,6 +124,7 @@ int main()
             if (tasks_length - 1 == 0)
             {
                 printf("\n\t\t\033[33m No taches availible !\033[0m\n");
+                break;
             }
 
             // if is not
@@ -129,7 +141,7 @@ int main()
                 if (sortmethod >= 0 && sortmethod <= 3)
                     break;
                 else
-                    printf("\033[31m\n\t\t\t-- Choix Invalide !! --\n\033[0m\n");
+                    printf("\033[31m\n\t\t\t-- Choix Invalide !! --\033[0m\n");
             }
 
             if (sortmethod == 0)
@@ -166,8 +178,7 @@ int main()
             int index = searchByID(_id);
             if (index == -1) // task not found
                 printf("\n\t\t\033[33mNo tache avec cet identifiant.!!\033[0m\n");
-
-            else // task exist
+            else
             {
                 int arg_number;
                 printf("\n\t\t Choisir critere : \n"
@@ -181,7 +192,7 @@ int main()
                     arg_number = getIntInput();
                     if (!(arg_number >= 0 && arg_number <= 3))
                     {
-                        printf("\033[31m\n\t\t\t-- Choix Invalide !! --\n\033[0m\n");
+                        printf("\033[31m\n\t\t\t-- Choix Invalide !! --\033[0m\n");
                     }
                     else
                     {
@@ -192,115 +203,10 @@ int main()
                 if (arg_number == 0)
                     break; // go menu
 
-                switch (arg_number)
-                {
-                case 1: // Update description (Done)
-                {
-                    char newDescription[200];
-
-                    while (1)
-                    {
-                        printf("\n\t\t Saisir la nouvelle description  : ");
-                        fflush(stdin);
-                        fgets(newDescription, sizeof(newDescription), stdin);
-                        int len = strlen(newDescription);
-                        if (len > 4)
-                        {
-                            if (newDescription[len - 1] == '\n')
-                                newDescription[len - 1] = '\0';
-                            break;
-                        }
-                        else
-                            printf("\033[31m\n\t\t\t-- Description Invalide !! --\n\033[0m\n");
-                    }
-
-                    strcpy(tasks[index].description, newDescription);
-                    printf("\n\t\033[32mDescription modifie avec succese.\033[0m\n");
-                    break;
-                } // end case 4_1
-
-                case 2: // Update status (Done)
-                {
-                    int status_number;
-                    printf("\n\t\tStatut : "
-                           "\n\t\t\t 1. A realisee."
-                           "\n\t\t\t 2. En cours de realisation."
-                           "\n\t\t\t 3. Finalisee."
-                           "\n\t\t\t 0. Menu principale.");
-
-                    while (1)
-                    {
-                        printf("\n\t\t--> : ");
-                        status_number = getIntInput();
-                        if (!(status_number >= 0 && status_number <= 3))
-                            printf("\033[31m\n\t\t\t-- Choix Invalide !! --\n\033[0m\n");
-                        else
-                            break;
-                    }
-
-                    if (status_number == 0)
-                        break; // go Menu
-
-                    switch (status_number)
-                    {
-                    case 1:
-                        strcpy(tasks[index].status, "A realiser");
-                        break;
-
-                    case 2:
-                        strcpy(tasks[index].status, "En cours de realisation");
-                        break;
-
-                    case 3:
-                        strcpy(tasks[index].status, "Finalisee");
-                        break;
-                    }
-
-                    printf("\n\t\033[32mStatut modifie avec succese.\033[0m\n");
-                    break;
-
-                } // end case 4_2
-
-                case 3: // Update deadline (Done)
-                {
-
-                    char input[11];
-                    int year, month, day;
-                    time_t t = time(NULL);
-                    struct tm currentTime = *localtime(&t);
-
-                    // deadline year month and day
-
-                    while (1)
-                    {
-                        printf("\n\t\t Saisir deadline (DD/MM/YYYY) : ");
-                        fflush(stdin);
-                        fgets(input, sizeof(input), stdin);
-                        int len = strlen(input);
-                        if (input[len - 1] == '\n')
-                            input[len - 1] = '\0';
-                        if (sscanf(input, "%02d/%02d/%04d", &day, &month, &year) != 3 || year < 0 || month < 1 || month > 12 || day < 1 || day > 31)
-                        {
-                            printf("\033[31m\n\t\t\t-- Date Invalide !! --\n\033[0m\n");
-                        }
-                        else
-                            break;
-                    }
-
-                    tasks[index].deadline.tm_year = year - 1900;
-                    tasks[index].deadline.tm_mon = month - 1;
-                    tasks[index].deadline.tm_mday = day;
-                    tasks[index].deadline.tm_hour = currentTime.tm_hour;
-                    tasks[index].deadline.tm_min = currentTime.tm_min;
-                    tasks[index].deadline.tm_sec = currentTime.tm_sec;
-
-                    printf("\n\t\033[32mDeadline modifie avec succesee.\033[0m\n");
-                    break;
-                } // end case 4_3
-
-                } /* end Update switch */
-
-                displayTask(tasks[index]);
+                if (updateTask(index, arg_number))
+                    displayTask(tasks[index]);
+                else
+                    printf("\n\t\t\033[31m Erreur !! .\033[0m\n");
             }
             break;
         }
@@ -329,9 +235,11 @@ int main()
                     break;
                 }
                 if (deleteTask(index))
+                {
                     printf("\n\t\t\033[32mTache supprimes avec succes.\033[0m\n");
+                }
                 else
-                    printf("\n\t\tErreur !! .\n");
+                    printf("\n\t\t\033[31m Erreur !! .\033[0m\n");
             }
             break;
         } // end case 5
@@ -350,7 +258,7 @@ int main()
                 if (searchArg >= 0 && searchArg <= 2)
                     break;
                 else
-                    printf("\033[31m\n\t\t\t-- Choix Invalide !! --\n\033[0m\n");
+                    printf("\033[31m\n\t\t\t-- Choix invalide !! -- \033[0m\n");
             }
 
             if (searchArg == 0)
@@ -386,7 +294,7 @@ int main()
                         break;
                     }
                     else
-                        printf("\033[31m\n\t\t\t-- Titre Invalide !! --\n\033[0m\n");
+                        printf("\033[31m\n\t\t\t-- Titre invalide !! -- \033[0m\n");
                 }
 
                 searchByTitle(search_title);
@@ -398,7 +306,7 @@ int main()
             break;
         } // End case 6
 
-        case 7: // Statistics ...
+        case 7: // Statistics (Done)
         {
             int display_choise;
             printf("\n\tNombre total des taches : %d"
@@ -415,7 +323,7 @@ int main()
                 display_choise = getIntInput();
                 if (display_choise >= 0 && display_choise <= 2)
                     break;
-                printf("\033[31m\n\t\t\t-- Choix Invalide !! --\n\033[0m\n");
+                printf("\033[31m\n\t\t\t-- Choix invalide !! -- \033[0m\n");
             }
 
             if (display_choise == 0)
@@ -437,10 +345,17 @@ int main()
 
         case 8: // Exit (Done)
         {
-            printf("\n\n***** A bientot. *****\n\n");
-            break;
+            if (saveTasks())
+            {
+                printf("\n\033[32m \t--> Les donnees enregistrees avec succes <--\033[0m\n");
+                printf("\n\033[34m\t***** A bientot. *****\033[0m\n\n");
+                break;
+            }
+            else{
+                choise = 0;
+                printf("\n\t\033[33mLes donnees ne sont pas enregistrees !!!\n \033[0m");
+            }
         }
-
         } // end switch
     }
 
@@ -459,96 +374,105 @@ void seeder()
     struct tm currentTime = *localtime(&t);
 
     // task 1
-    tasks[0].id = 1;
-    strcpy(tasks[0].title, "task : a week up");
-    strcpy(tasks[0].description, "description task 3");
+    Task task1 = {
+        .id = 1,
+        .title = "task : a week up",
+        .description = "description task 3",
 
-    tasks[0].deadline.tm_year = 2023 - 1900;
-    tasks[0].deadline.tm_mon = 9 - 1;
-    tasks[0].deadline.tm_mday = 22;
+        .deadline.tm_year = 2023 - 1900,
+        .deadline.tm_mon = 9 - 1,
+        .deadline.tm_mday = 22,
 
-    tasks[0].deadline.tm_hour = 17;
-    tasks[0].deadline.tm_min = 35;
-    tasks[0].deadline.tm_sec = 25;
+        .deadline.tm_hour = 17,
+        .deadline.tm_min = 35,
+        .deadline.tm_sec = 25,
 
-    strcpy(tasks[0].status, "A realiser");
+        .status = "A realiser",
 
-    tasks[0].created_at.tm_year = 2023 - 1900;
-    tasks[0].created_at.tm_mon = 9 - 1;
-    tasks[0].created_at.tm_mday = 21;
+        .created_at.tm_year = 2023 - 1900,
+        .created_at.tm_mon = 9 - 1,
+        .created_at.tm_mday = 21,
 
-    tasks[0].created_at.tm_hour = 12;
-    tasks[0].created_at.tm_min = 35;
-    tasks[0].created_at.tm_sec = 25;
+        .created_at.tm_hour = 12,
+        .created_at.tm_min = 35,
+        .created_at.tm_sec = 25};
+    tasks[0] = task1;
 
     // task 2
-    tasks[1].id = 2;
-    strcpy(tasks[1].title, "task : C have breakfast");
-    strcpy(tasks[1].description, "description task 2");
+    Task task2 = {
+        .id = 2,
+        .title = "task : C have breakfast",
+        .description = "description task 2",
 
-    tasks[1].deadline.tm_year = 2023 - 1900;
-    tasks[1].deadline.tm_mon = 9 - 1;
-    tasks[1].deadline.tm_mday = 24;
+        .deadline.tm_year = 2023 - 1900,
+        .deadline.tm_mon = 9 - 1,
+        .deadline.tm_mday = 24,
 
-    tasks[1].deadline.tm_hour = 12;
-    tasks[1].deadline.tm_min = 35;
-    tasks[1].deadline.tm_sec = 25;
+        .deadline.tm_hour = 12,
+        .deadline.tm_min = 35,
+        .deadline.tm_sec = 25,
 
-    strcpy(tasks[1].status, "finalisee");
+        .status = "finalisee",
 
-    tasks[1].created_at.tm_year = 2023 - 1900;
-    tasks[1].created_at.tm_mon = 9 - 1;
-    tasks[1].created_at.tm_mday = 21;
+        .created_at.tm_year = 2023 - 1900,
+        .created_at.tm_mon = 9 - 1,
+        .created_at.tm_mday = 21,
 
-    tasks[1].created_at.tm_hour = 9;
-    tasks[1].created_at.tm_min = 45;
-    tasks[1].created_at.tm_sec = 25;
+        .created_at.tm_hour = 9,
+        .created_at.tm_min = 45,
+        .created_at.tm_sec = 25};
+    tasks[1] = task2;
 
     // task3
-    tasks[2].id = 3;
-    strcpy(tasks[2].title, "task : A morning training");
-    strcpy(tasks[2].description, "description task 4");
+    Task task3 = {
+        .id = 3,
+        .title = "task : A morning training",
+        .description = "description task 4",
 
-    tasks[2].deadline.tm_year = 2023 - 1900;
-    tasks[2].deadline.tm_mon = 10 - 1;
-    tasks[2].deadline.tm_mday = 7;
+        .deadline.tm_year = 2023 - 1900,
+        .deadline.tm_mon = 10 - 1,
+        .deadline.tm_mday = 7,
 
-    tasks[2].deadline.tm_hour = 12;
-    tasks[2].deadline.tm_min = 35;
-    tasks[2].deadline.tm_sec = 25;
+        .deadline.tm_hour = 12,
+        .deadline.tm_min = 35,
+        .deadline.tm_sec = 25,
 
-    strcpy(tasks[2].status, "finalisee");
+        .status = "finalisee",
 
-    tasks[2].created_at.tm_year = 2023 - 1900;
-    tasks[2].created_at.tm_mon = 9 - 1;
-    tasks[2].created_at.tm_mday = 29;
+        .created_at.tm_year = 2023 - 1900,
+        .created_at.tm_mon = 9 - 1,
+        .created_at.tm_mday = 29,
 
-    tasks[2].created_at.tm_hour = 22;
-    tasks[2].created_at.tm_min = 45;
-    tasks[2].created_at.tm_sec = 35;
+        .created_at.tm_hour = 22,
+        .created_at.tm_min = 45,
+        .created_at.tm_sec = 35,
+    };
+    tasks[2] = task3;
 
     // task 4
-    tasks[3].id = 4;
-    strcpy(tasks[3].title, "task : c kassi kasaka");
-    strcpy(tasks[3].description, "description task 1");
+    Task task4 = {
+        .id = 4,
+        .title = "task : c kassi kasaka",
+        .description = "description task 1",
 
-    tasks[3].deadline.tm_year = 2023 - 1900;
-    tasks[3].deadline.tm_mon = 9 - 1;
-    tasks[3].deadline.tm_mday = 23;
+        .deadline.tm_year = 2023 - 1900,
+        .deadline.tm_mon = 9 - 1,
+        .deadline.tm_mday = 23,
 
-    tasks[3].deadline.tm_hour = 12;
-    tasks[3].deadline.tm_min = 35;
-    tasks[3].deadline.tm_sec = 25;
+        .deadline.tm_hour = 12,
+        .deadline.tm_min = 35,
+        .deadline.tm_sec = 25,
 
-    strcpy(tasks[3].status, "A realiser");
+        .status = "A realiser",
 
-    tasks[3].created_at.tm_year = 2023 - 1900;
-    tasks[3].created_at.tm_mon = 9 - 1;
-    tasks[3].created_at.tm_mday = 21;
+        .created_at.tm_year = 2023 - 1900,
+        .created_at.tm_mon = 9 - 1,
+        .created_at.tm_mday = 21,
 
-    tasks[3].created_at.tm_hour = 23;
-    tasks[3].created_at.tm_min = 45;
-    tasks[3].created_at.tm_sec = 55;
+        .created_at.tm_hour = 23,
+        .created_at.tm_min = 45,
+        .created_at.tm_sec = 55};
+    tasks[3] = task4;
 }
 
 // done
@@ -596,7 +520,7 @@ int deleteTask(int index)
     tasks = (Task *)realloc(tasks, tasks_length * sizeof(Task));
     if (!tasks)
     {
-        printf("\n !!!!!!!!!!!!!! Server error !!!!!!!!!!!!!\n");
+        printf("\n\033[31m !!!!!!!!!!!!!! Server error !!!!!!!!!!!!! \033[0m\n");
         return 0;
     }
     return 1;
@@ -686,60 +610,30 @@ void sortByTitle()
 }
 
 // done
-void displayTasks(int max_deadline_days)
+int displayTasks(int max_deadline_days)
 {
+    int count = 0;
     for (int i = 0; i < tasks_length - 1; i++)
     {
-        char deadlineSTR[40], createdAtSTR[40];
-        int day, hour, min;
-
-        // Format date
-        strftime(deadlineSTR, 40, "%m/%d/%Y %H:%M:%S", &(tasks[i].deadline));
-        strftime(createdAtSTR, 40, "%m/%d/%Y %H:%M:%S", &(tasks[i].created_at));
-
-        // deadAfter
-        time_t current_t = time(NULL);
-        time_t inDead = mktime(&tasks[i].deadline);
-
-        long long int deadAfter = inDead - current_t;
-
-        // Time representation
-        day = (int)(deadAfter / (3600 * 24));
-        hour = (int)((deadAfter % (3600 * 24)) / 3600);
-        min = (int)((deadAfter % (3600)) / 60);
-
+        count++;
         if (max_deadline_days == 0)
         {
-            printf("\n\t\tid         : %d"
-                   "\n\t\ttitle      : %s"
-                   "\n\t\tdesc       : %s"
-                   "\n\t\tstatut     : %s"
-                   "\n\t\tdeadline   : %s"
-                   "\n\t\tcreated at : %s"
-                   "\n\t\tdead after : %d jours %d heurs %d min"
-                   "\n\t\t\t_______________________\n",
-                   tasks[i].id, tasks[i].title, tasks[i].description,
-                   tasks[i].status, deadlineSTR, createdAtSTR, day, hour, min);
+            displayTask(tasks[i]);
+            continue;
         }
-        else if (deadAfter <= (max_deadline_days * 24 * 3600))
-        {
-            printf("\n\t\tid         : %d"
-                   "\n\t\ttitle      : %s"
-                   "\n\t\tdesc       : %s"
-                   "\n\t\tstatut     : %s"
-                   "\n\t\tdeadline   : %s"
-                   "\n\t\tcreated at : %s"
-                   "\n\t\tdead after : %d jours %d heurs %d min"
-                   "\n\t\t\t_______________________\n",
-                   tasks[i].id, tasks[i].title, tasks[i].description,
-                   tasks[i].status, deadlineSTR, createdAtSTR, day,
-                   hour, min);
-        }
+
+        time_t current_t = time(NULL);
+        time_t inDead = mktime(&tasks[i].deadline);
+        long long int deadAfter = inDead - current_t;
+
+        if (deadAfter <= (max_deadline_days * 24 * 3600))
+            displayTask(tasks[i]);
     }
+    return count;
 }
 
 // done
-void displayTask(Task task)
+int displayTask(Task task)
 {
     char deadlineSTR[40], createdAtSTR[40];
     int day, hour, min;
@@ -772,7 +666,119 @@ void displayTask(Task task)
 }
 
 // done
-void addTask(int number)
+int updateTask(int index, int arg_number)
+{
+    switch (arg_number)
+    {
+    case 1: // Update description (Done)
+    {
+        char newDescription[200];
+
+        while (1)
+        {
+            printf("\n\t\t Saisir la nouvelle description  : ");
+            fflush(stdin);
+            fgets(newDescription, sizeof(newDescription), stdin);
+            int len = strlen(newDescription);
+            if (len > 4)
+            {
+                if (newDescription[len - 1] == '\n')
+                    newDescription[len - 1] = '\0';
+                break;
+            }
+            else
+                printf("\033[31m\n\t\t\t-- Description Invalide !! --\033[0m\n");
+        }
+
+        strcpy(tasks[index].description, newDescription);
+        printf("\n\t\033[32mDescription modifie avec succese.\033[0m\n");
+        break;
+    } // end case 4_1
+
+    case 2: // Update status (Done)
+    {
+        int status_number;
+        printf("\n\t\tStatut : "
+               "\n\t\t\t 1. A realisee."
+               "\n\t\t\t 2. En cours de realisation."
+               "\n\t\t\t 3. Finalisee."
+               "\n\t\t\t 0. Menu principale.");
+
+        while (1)
+        {
+            printf("\n\t\t--> : ");
+            status_number = getIntInput();
+            if (!(status_number >= 0 && status_number <= 3))
+                printf("\033[31m\n\t\t\t-- Choix invalide !! -- \033[0m\n");
+            else
+                break;
+        }
+
+        if (status_number == 0)
+            break; // go Menu
+
+        switch (status_number)
+        {
+        case 1:
+            strcpy(tasks[index].status, "A realiser");
+            break;
+
+        case 2:
+            strcpy(tasks[index].status, "En cours de realisation");
+            break;
+
+        case 3:
+            strcpy(tasks[index].status, "Finalisee");
+            break;
+        }
+
+        printf("\n\t\033[32mStatut modifie avec succese.\033[0m\n");
+        break;
+
+    } // end case 4_2
+
+    case 3: // Update deadline (Done)
+    {
+
+        char input[11];
+        int year, month, day;
+        time_t t = time(NULL);
+        struct tm currentTime = *localtime(&t);
+
+        // deadline year month and day
+
+        while (1)
+        {
+            printf("\n\t\t Saisir deadline (DD/MM/YYYY) : ");
+            fflush(stdin);
+            fgets(input, sizeof(input), stdin);
+            int len = strlen(input);
+            if (input[len - 1] == '\n')
+                input[len - 1] = '\0';
+            if (sscanf(input, "%02d/%02d/%04d", &day, &month, &year) != 3 || year < 0 || month < 1 || month > 12 || day < 1 || day > 31)
+            {
+                printf("\033[31m\n\t\t\t-- Date invalide !! -- \033[0m\n");
+            }
+            else
+                break;
+        }
+
+        tasks[index].deadline.tm_year = year - 1900;
+        tasks[index].deadline.tm_mon = month - 1;
+        tasks[index].deadline.tm_mday = day;
+        tasks[index].deadline.tm_hour = currentTime.tm_hour;
+        tasks[index].deadline.tm_min = currentTime.tm_min;
+        tasks[index].deadline.tm_sec = currentTime.tm_sec;
+
+        printf("\n\t\033[32mDeadline modifie avec succesee.\033[0m\n");
+        break;
+    } // end case 4_3
+
+    } /* end Update switch */
+}
+
+// done
+int addTask(int number)
 {
     for (int i = 0; i < number; i++)
     {
@@ -796,7 +802,7 @@ void addTask(int number)
                 break;
             }
             else
-                printf("\033[31m\n\t\t\t-- Titre Invalide !! --\n\033[0m\n");
+                printf("\033[31m\n\t\t\t-- Titre invalide !! -- \033[0m\n");
         }
 
         // description
@@ -813,13 +819,13 @@ void addTask(int number)
                 break;
             }
             else
-                printf("\033[31m\n\t\t\t-- Description Invalide !! --\n\033[0m\n");
+                printf("\033[31m\n\t\t\t-- Description Invalide !! --\033[0m\n");
         }
 
         // deadline year month and day
         while (1)
         {
-            printf("\n\t\t Saisir deadline (DD/MM/YYYY) : ");
+            printf("\t\t Saisir deadline (DD/MM/YYYY) : ");
             fflush(stdin);
             fgets(input, sizeof(input), stdin);
             int len = strlen(input);
@@ -827,7 +833,7 @@ void addTask(int number)
                 input[len - 1] = '\0';
             if (sscanf(input, "%02d/%02d/%04d", &day, &month, &year) != 3 || year < 0 || month < 1 || month > 12 || day < 1 || day > 31)
             {
-                printf("\033[31m\n\t\t\t-- Date Invalide !! --\n\033[0m\n");
+                printf("\033[31m\n\t\t\t-- Date Invalide !! --\033[0m\n");
             }
             else
             {
@@ -884,12 +890,11 @@ void addTask(int number)
         tasks = (Task *)realloc(tasks, tasks_length * sizeof(Task));
         if (!tasks)
         {
-            printf("\n !!!!!!!!!!!!!! Server error !!!!!!!!!!!!!\n");
+            printf("\n\033[31m !!!!!!!!!!!!!! Server error !!!!!!!!!!!!! \033[31m\n");
+            return 0;
         }
     }
-
-    // message
-    number == 1 ? printf("\n\t\t\033[32mTache est ajoutee avec succes.\033[0m\n") : printf("\n\t\t\033[32mTaches sont ajoutees avec succes.\033[0m\n");
+    return 1;
 }
 
 // done
@@ -947,7 +952,7 @@ int getChoise()
         }
         else
         {
-            printf("\033[31m\n\t\t\t-- Choix Invalide !! --\n\033[0m\n");
+            printf("\033[31m\n\t\t\t-- Choix Invalide !! --\033[0m\n");
         }
     };
 
@@ -964,7 +969,8 @@ int getIntInput()
     int len = strlen(input);
     if (input[len - 1] == '\n')
         input[len - 1] = '\0';
-    if (!isNumber(input)) return -1;
+    if (!isNumber(input))
+        return -1;
 
     // verify valide input
     if (sscanf(input, "%d", &choise) && choise >= 0)
@@ -978,7 +984,42 @@ int isNumber(char string[])
 {
     for (int i = 0; i < strlen(string); i++)
     {
-        if (!isdigit(string[i])) return 0;
+        if (!isdigit(string[i]))
+            return 0;
     }
+    return 1;
+}
+
+// doing
+int saveTasks()
+{
+    FILE *myFile;
+    fopen_s(&myFile, "C:/Users/Youcode/Desktop/SAS/YouCode_Projet-Fin-SAS/Tasks.dat", "w");
+    if (myFile == NULL)
+    {
+        printf("\n\t\033[31mErreur: fichier tasks.dat n\'ouvrir pas !! \n\033[0m");
+        return 0;
+    }
+    for (int i = 0; i < tasks_length - 1; i++)
+    {
+        char task__str[300];
+
+        sprintf(task__str, "%d, %s, %s, %d/%d/%d %d:%d:%d, %s, %d/%d/%d %d:%d:%d\n",
+                tasks[i].id,
+                tasks[i].title,
+                tasks[i].description,
+                tasks[i].deadline.tm_mday, tasks[i].deadline.tm_mon, tasks[i].deadline.tm_year, tasks[i].deadline.tm_hour, tasks[i].deadline.tm_min, tasks[i].deadline.tm_sec,
+                tasks[i].status,
+                tasks[i].created_at.tm_mday, tasks[i].created_at.tm_mon, tasks[i].created_at.tm_year, tasks[i].created_at.tm_hour, tasks[i].created_at.tm_min, tasks[i].created_at.tm_sec);
+
+        {
+            if (!fwrite(task__str, sizeof(char), strlen(task__str), myFile))
+            {
+                printf("\n\t\033[31m Erreur lors de l\'enregistrement dans le fichier .\033[0m\n");
+                return 0;
+            }
+        }
+    }
+    fclose(myFile);
     return 1;
 }
