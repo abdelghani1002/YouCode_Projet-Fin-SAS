@@ -21,6 +21,7 @@
 /* Libraries */
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <string.h>
 #include <time.h>
 
@@ -36,6 +37,7 @@ typedef struct
 } Task;
 
 /* Functions declaration */
+int isNumber();
 int getIntInput();
 int getChoise();
 int isIn_STR();
@@ -95,7 +97,7 @@ int main()
                 printf("\n\t Combien de taches vous voulez ajouter ? : ");
                 newTasks_number = getIntInput();
                 if (newTasks_number < 1)
-                    printf("\t\nNombre Invalide !!\n");
+                    printf("\033[31m\n\t\t\t-- Nombre Invalide !! --\n\033[0m\n");
                 else
                     break;
             }
@@ -110,7 +112,7 @@ int main()
             // if tasks is empty
             if (tasks_length - 1 == 0)
             {
-                printf("\n\t\t\t\t No taches availible !\n");
+                printf("\n\t\t\033[33m No taches availible !\033[0m\n");
             }
 
             // if is not
@@ -127,7 +129,7 @@ int main()
                 if (sortmethod >= 0 && sortmethod <= 3)
                     break;
                 else
-                    printf("\n !! choix invalide !!! \n");
+                    printf("\033[31m\n\t\t\t-- Choix Invalide !! --\n\033[0m\n");
             }
 
             if (sortmethod == 0)
@@ -163,7 +165,7 @@ int main()
             _id = getIntInput();
             int index = searchByID(_id);
             if (index == -1) // task not found
-                printf("\n\t\tNo tache avec cet identifiant.!!\n");
+                printf("\n\t\t\033[33mNo tache avec cet identifiant.!!\033[0m\n");
 
             else // task exist
             {
@@ -179,7 +181,7 @@ int main()
                     arg_number = getIntInput();
                     if (!(arg_number >= 0 && arg_number <= 3))
                     {
-                        printf("\n\tChoix Invalide !!\n");
+                        printf("\033[31m\n\t\t\t-- Choix Invalide !! --\n\033[0m\n");
                     }
                     else
                     {
@@ -209,11 +211,11 @@ int main()
                             break;
                         }
                         else
-                            printf("\n\tDescription invalide !\n");
+                            printf("\033[31m\n\t\t\t-- Description Invalide !! --\n\033[0m\n");
                     }
 
                     strcpy(tasks[index].description, newDescription);
-                    printf("\n\tDescription modifie avec succese.\n");
+                    printf("\n\t\033[32mDescription modifie avec succese.\033[0m\n");
                     break;
                 } // end case 4_1
 
@@ -231,7 +233,7 @@ int main()
                         printf("\n\t\t--> : ");
                         status_number = getIntInput();
                         if (!(status_number >= 0 && status_number <= 3))
-                            printf("\nSaisie invalide !!\n");
+                            printf("\033[31m\n\t\t\t-- Choix Invalide !! --\n\033[0m\n");
                         else
                             break;
                     }
@@ -254,7 +256,7 @@ int main()
                         break;
                     }
 
-                    printf("\n\tStatut modifie avec succese.\n");
+                    printf("\n\t\033[32mStatut modifie avec succese.\033[0m\n");
                     break;
 
                 } // end case 4_2
@@ -279,7 +281,7 @@ int main()
                             input[len - 1] = '\0';
                         if (sscanf(input, "%02d/%02d/%04d", &day, &month, &year) != 3 || year < 0 || month < 1 || month > 12 || day < 1 || day > 31)
                         {
-                            printf("\n\tDate Invalide\n");
+                            printf("\033[31m\n\t\t\t-- Date Invalide !! --\n\033[0m\n");
                         }
                         else
                             break;
@@ -292,7 +294,7 @@ int main()
                     tasks[index].deadline.tm_min = currentTime.tm_min;
                     tasks[index].deadline.tm_sec = currentTime.tm_sec;
 
-                    printf("\n\tDeadline modifie avec succesee.\n");
+                    printf("\n\t\033[32mDeadline modifie avec succesee.\033[0m\n");
                     break;
                 } // end case 4_3
 
@@ -311,23 +313,23 @@ int main()
             _id = getIntInput();
             int index = searchByID(_id);
             if (index == -1) // task not found
-                printf("\n\tNo tache avec cet identifiant.!!\n");
+                printf("\n\t\t\033[33mNo tache avec cet identifiant.!!\033[0m\n");
 
             else // task exist
             {
                 displayTask(tasks[index]);
                 char confirm;
-                printf("\n\t\tVoulez-vous vraiment supprimer cette tache ? (y/n) : ");
+                printf("\n\t\t\033[33mVoulez-vous vraiment supprimer cette tache ? (y/n) : \033[0m");
                 scanf("%c", &confirm);
 
                 // delete confirm
                 if (confirm != 'y' && confirm != 'Y')
                 {
-                    printf("\n\t\tL\'opration est annulee avec succes.\n");
+                    printf("\n\t\t\033[34mL\'opration est annulee avec succes.\033[0m\n");
                     break;
                 }
                 if (deleteTask(index))
-                    printf("\n\t\tTache supprimes avec succes.\n");
+                    printf("\n\t\t\033[32mTache supprimes avec succes.\033[0m\n");
                 else
                     printf("\n\t\tErreur !! .\n");
             }
@@ -348,7 +350,7 @@ int main()
                 if (searchArg >= 0 && searchArg <= 2)
                     break;
                 else
-                    printf("\n\t\t!! Choix Invalide !!\n");
+                    printf("\033[31m\n\t\t\t-- Choix Invalide !! --\n\033[0m\n");
             }
 
             if (searchArg == 0)
@@ -363,7 +365,7 @@ int main()
                 search_id = getIntInput();
 
                 int index = searchByID(search_id);
-                index != -1 ? displayTask(tasks[index]) : printf("\n\tNo tache avec ce identifiant !\n");
+                index != -1 ? displayTask(tasks[index]) : printf("\n\t\t\033[33mNo tache avec cet identifiant.!!\033[0m\n");
                 break;
 
             } // end case 6_1
@@ -384,7 +386,7 @@ int main()
                         break;
                     }
                     else
-                        printf("\n\tTitre invalide !!\n");
+                        printf("\033[31m\n\t\t\t-- Titre Invalide !! --\n\033[0m\n");
                 }
 
                 searchByTitle(search_title);
@@ -400,11 +402,11 @@ int main()
         {
             int display_choise;
             printf("\n\tNombre total des taches : %d"
-                   "\n\t\tTaches completes   : %d :)"
-                   "\n\t\tTaches incompletes : %d :( \n"
-                   "\n\t1. Afficher taches completes."
-                   "\n\t2. Afficher taches incompletes.\n"
-                   "\n\t0. Menu Principal.\n",
+                   "\n\tTaches completes   : %d :)"
+                   "\n\tTaches incompletes : %d :( \n"
+                   "\n\t\t1. Afficher taches completes."
+                   "\n\t\t2. Afficher taches incompletes."
+                   "\n\t\t0. Menu Principal.\n",
                    tasks_length - 1, getDoneTasksNumber(), tasks_length - 1 - getDoneTasksNumber());
 
             while (1)
@@ -413,7 +415,7 @@ int main()
                 display_choise = getIntInput();
                 if (display_choise >= 0 && display_choise <= 2)
                     break;
-                printf("\n\tChoix invalide !!\n");
+                printf("\033[31m\n\t\t\t-- Choix Invalide !! --\n\033[0m\n");
             }
 
             if (display_choise == 0)
@@ -624,7 +626,7 @@ void searchByTitle(char search_title[20])
         }
     }
     if (matched == 0)
-        printf("\n\t\tNo tache avec ce titre.");
+        printf("\n\t\t\033[33mNo tache avec ce titre.\033[0m");
 }
 
 // done
@@ -794,7 +796,7 @@ void addTask(int number)
                 break;
             }
             else
-                printf("\nTitre invalide !!\n");
+                printf("\033[31m\n\t\t\t-- Titre Invalide !! --\n\033[0m\n");
         }
 
         // description
@@ -811,7 +813,7 @@ void addTask(int number)
                 break;
             }
             else
-                printf("\n\tDescription invalide !!\n");
+                printf("\033[31m\n\t\t\t-- Description Invalide !! --\n\033[0m\n");
         }
 
         // deadline year month and day
@@ -825,7 +827,7 @@ void addTask(int number)
                 input[len - 1] = '\0';
             if (sscanf(input, "%02d/%02d/%04d", &day, &month, &year) != 3 || year < 0 || month < 1 || month > 12 || day < 1 || day > 31)
             {
-                printf("\n date Invalide\n");
+                printf("\033[31m\n\t\t\t-- Date Invalide !! --\n\033[0m\n");
             }
             else
             {
@@ -887,7 +889,7 @@ void addTask(int number)
     }
 
     // message
-    number == 1 ? printf("\n\t\tTache est ajoutee avec succes.\n") : printf("\n\t\tLes taches sont ajoutees avec succes.\n");
+    number == 1 ? printf("\n\t\t\033[32mTache est ajoutee avec succes.\033[0m\n") : printf("\n\t\t\033[32mTaches sont ajoutees avec succes.\033[0m\n");
 }
 
 // done
@@ -922,19 +924,20 @@ int getChoise()
     int choise = 0;
     while (1)
     {
-        printf("\n\t===============================================\n\t"
-               "\tMenu d\'application\n\t"
-               "===============================================\n\t"
-               "\t[1] Ajouter une tache\n\t"
-               "\t[2] Ajouter plusieur taches\n\t"
-               "\t[3] Afficher la list de taches\n\t"
-               "\t[4] Modifier une tache\n\t"
-               "\t[5] Supprimer une donnee par identifiant\n\t"
-               "\t[6] Rechercher les taches\n\t"
-               "\t[7] Statistiques\n\t"
-               "\t[8] Quitter\n\t"
-               "===============================================\n\t"
-               "\n\tTapez votre choix [0-8] : ");
+        printf("\n"
+               "\t==============================================\n\t"
+               "|          \033[36mMenu d\'application\033[0m                |\n"
+               "\t==============================================\n\t"
+               "|\t[1] Ajouter une tache                |\n\t"
+               "|\t[2] Ajouter plusieur taches          |\n\t"
+               "|\t[3] Afficher la list de taches       |\n\t"
+               "|\t[4] Modifier une tache               |\n\t"
+               "|\t[5] Supprimer une tache              |\n\t"
+               "|\t[6] Rechercher les taches            |\n\t"
+               "|\t[7] Statistiques                     |\n\t"
+               "|\t[\033[33m8\033[0m] \033[33mQuitter\033[0m                          |\n"
+               "\t==============================================\n\t"
+               "\n\tTapez votre choix [1-8] : ");
 
         // get the input from user.
         choise = getIntInput();
@@ -961,10 +964,21 @@ int getIntInput()
     int len = strlen(input);
     if (input[len - 1] == '\n')
         input[len - 1] = '\0';
+    if (!isNumber(input)) return -1;
 
     // verify valide input
     if (sscanf(input, "%d", &choise) && choise >= 0)
         return choise;
     else
         return -1;
+}
+
+// done
+int isNumber(char string[])
+{
+    for (int i = 0; i < strlen(string); i++)
+    {
+        if (!isdigit(string[i])) return 0;
+    }
+    return 1;
 }
