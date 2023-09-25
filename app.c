@@ -1,33 +1,3 @@
-/* Task Management Application
- *
- * Description:
- * This application provides a menu-driven interface for managing tasks.
- * Users can add, read, modify, delete, and search for tasks.
- * The application allows sorting tasks and provides statistics on tasks.
- *
- * Features:
- * - Add new tasks with unique identifiers, titles, descriptions, deadlines, collaborators, and statuse.
- * - Display a list of all tasks, sorted alphabetically or by deadline.
- * - Show tasks with deadlines within the next three days.
- * - Modify task details, including descriptions, statuses, and deadlines.
- * - Delete tasks by their unique identifiers.
- * - Search for tasks.
- * - View statistics, including the total number of tasks, completed and incomplete tasks, and days until task deadlines.
- *
- * Author: AIT TAMGHART Abdelghani
- * Date: 20/09/2023
- */
-
-/*
-sprintf(task__str, "%d, %s, %s, %d/%d/%d %d:%d:%d, %s, %d/%d/%d %d:%d:%d\n",
-                tasks[i].id,
-                tasks[i].title,
-                tasks[i].description,
-                tasks[i].deadline.tm_mday, tasks[i].deadline.tm_mon, tasks[i].deadline.tm_year, tasks[i].deadline.tm_hour, tasks[i].deadline.tm_min, tasks[i].deadline.tm_sec,
-                tasks[i].status,
-                tasks[i].created_at.tm_mday, tasks[i].created_at.tm_mon, tasks[i].created_at.tm_year, tasks[i].created_at.tm_hour, tasks[i].created_at.tm_min, tasks[i].created_at.tm_sec);
- */
-
 /* Libraries */
 #include <stdio.h>
 #include <stdlib.h>
@@ -67,17 +37,14 @@ int getDoneTasksNumber();
 void displayDoneTasks();
 void displayNonDoneTasks();
 
-/* Constances */
-
 /* Global variables */
-int tasks_length = 1; // 5 size of the tasks array
-int nextID = 1;       // 5 generate an ID automatically
-Task *tasks;          // ** pointer to tasks array ** //
+int tasks_length = 1;
+int nextID = 1;
+Task *tasks;
 
 /* main */
 int main()
 {
-
     int choise = 1, res = 0;
 
     // allocate memory for the tasks pointer
@@ -99,7 +66,7 @@ int main()
         choise = getChoise();
         switch (choise)
         {
-        case 1: // Add one (Done)
+        case 1: // Add one
         {
             if (addTask(1))
             {
@@ -133,7 +100,7 @@ int main()
             break;
         } // end case 2
 
-        case 3: // Display (Done)
+        case 3: // Display
         {
             // if tasks is empty
             if (tasks_length - 1 == 0)
@@ -184,7 +151,7 @@ int main()
             break;
         } // end case 3
 
-        case 4: // Update (Done)
+        case 4: // Update
         {
             // get Id and search for task match it.
             int _id;
@@ -226,7 +193,7 @@ int main()
             break;
         }
 
-        case 5: // Delete (Done)
+        case 5: // Delete
         {
             // get Id and search for task with that id.
             int _id;
@@ -259,7 +226,7 @@ int main()
             break;
         } // end case 5
 
-        case 6: // Search (Done)
+        case 6: // Search
         {
             int searchArg;
             printf("\n\tChoisir critere de recherche :"
@@ -322,7 +289,7 @@ int main()
             break;
         } // End case 6
 
-        case 7: // Statistics (Done)
+        case 7: // Statistics
         {
             int display_choise;
             printf("\n\tNombre total des taches : %d"
@@ -359,7 +326,7 @@ int main()
             break;
         } // end case 7
 
-        case 8: // Exit (Done)
+        case 8: // Exit
         {
             if (tasks_length > 1)
             {
@@ -384,7 +351,6 @@ int main()
 
 
 /* Functions definition */
-// done
 void seeder()
 {
     char str[13];
@@ -493,7 +459,6 @@ void seeder()
     tasks[3] = task4;
 }
 
-// done
 void displayDoneTasks()
 {
     for (int i = 0; i < tasks_length - 1; i++)
@@ -503,7 +468,6 @@ void displayDoneTasks()
     }
 }
 
-// done
 void displayNonDoneTasks()
 {
     for (int i = 0; i < tasks_length - 1; i++)
@@ -513,7 +477,6 @@ void displayNonDoneTasks()
     }
 }
 
-// done
 int getDoneTasksNumber()
 {
     int number = 0;
@@ -525,7 +488,6 @@ int getDoneTasksNumber()
     return number;
 }
 
-// done
 int deleteTask(int index)
 {
     for (int i = index + 1; i < tasks_length; i++)
@@ -544,7 +506,6 @@ int deleteTask(int index)
     return 1;
 }
 
-// done
 int searchByID(int id)
 {
     for (int i = 0; i < tasks_length - 1; i++)
@@ -555,7 +516,6 @@ int searchByID(int id)
     return -1;
 }
 
-// done
 int searchByTitle(char search_title[20])
 {
     int matched = 0;
@@ -570,7 +530,6 @@ int searchByTitle(char search_title[20])
     return matched;
 }
 
-// done
 int sortByDeadline()
 {
     int min_pos, i;
@@ -604,7 +563,6 @@ int sortByDeadline()
     return 0;
 }
 
-// done
 int sortByTitle()
 {
     int min_pos, i;
@@ -632,7 +590,6 @@ int sortByTitle()
 
 }
 
-// done
 int displayTasks(int max_deadline_days)
 {
     int count = 0;
@@ -657,7 +614,6 @@ int displayTasks(int max_deadline_days)
     return count;
 }
 
-// done
 int displayTask(Task task)
 {
     char deadlineSTR[40], createdAtSTR[40];
@@ -690,7 +646,6 @@ int displayTask(Task task)
            task.status, deadlineSTR, createdAtSTR, day, hour, min);
 }
 
-// done
 int updateTask(int index, int arg_number)
 {
     switch (arg_number)
@@ -802,7 +757,6 @@ int updateTask(int index, int arg_number)
     } /* end Update switch */
 }
 
-// done
 int addTask(int number)
 {
     for (int i = 0; i < number; i++)
@@ -922,7 +876,6 @@ int addTask(int number)
     return 1;
 }
 
-// done
 int isIn_STR(char str1[], char str2[])
 {
     int itIs = 0;
@@ -948,7 +901,6 @@ int isIn_STR(char str1[], char str2[])
     return itIs;
 }
 
-// done
 int getChoise()
 {
     int choise = 0;
@@ -984,7 +936,6 @@ int getChoise()
     return choise;
 }
 
-// done
 int getIntInput()
 {
     char input[10];
@@ -1004,7 +955,6 @@ int getIntInput()
         return -1;
 }
 
-// done
 int isNumber(char string[])
 {
     for (int i = 0; i < strlen(string); i++)
@@ -1015,7 +965,6 @@ int isNumber(char string[])
     return 1;
 }
 
-// done
 char *to_lower(char *string)
 {
     for (int i = 0; string[i] != '\0'; i++)
@@ -1025,7 +974,6 @@ char *to_lower(char *string)
     return string;
 }
 
-// done
 int saveTasks()
 {
     FILE *myFile;
@@ -1059,7 +1007,6 @@ int saveTasks()
     return 1;
 }
 
-// done
 int readTasks()
 {
     FILE *myFile;
