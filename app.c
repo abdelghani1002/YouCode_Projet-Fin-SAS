@@ -18,6 +18,16 @@
  * Date: 20/09/2023
  */
 
+/*
+sprintf(task__str, "%d, %s, %s, %d/%d/%d %d:%d:%d, %s, %d/%d/%d %d:%d:%d\n",
+                tasks[i].id,
+                tasks[i].title,
+                tasks[i].description,
+                tasks[i].deadline.tm_mday, tasks[i].deadline.tm_mon, tasks[i].deadline.tm_year, tasks[i].deadline.tm_hour, tasks[i].deadline.tm_min, tasks[i].deadline.tm_sec,
+                tasks[i].status,
+                tasks[i].created_at.tm_mday, tasks[i].created_at.tm_mon, tasks[i].created_at.tm_year, tasks[i].created_at.tm_hour, tasks[i].created_at.tm_min, tasks[i].created_at.tm_sec);
+ */
+
 /* Libraries */
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,47 +47,52 @@ typedef struct
 } Task;
 
 /* Functions declaration */
+int readTasks();
 int saveTasks();
 int isNumber();
 int getIntInput();
 int getChoise();
+char *to_lower();
 int isIn_STR();
 int addTask();
 int updateTask();
 int displayTask();
 int displayTasks();
-void sortByTitle();
-void sortByDeadline();
-void searchByTitle();
+int sortByTitle();
+int sortByDeadline();
+int searchByTitle();
 int searchByID();
 int deleteTask();
 int getDoneTasksNumber();
 void displayDoneTasks();
 void displayNonDoneTasks();
-void seeder();
 
 /* Constances */
 
 /* Global variables */
-int tasks_length = 5; // size of the tasks array
-int nextID = 5;       // generate an ID automatically
+int tasks_length = 1; // 5 size of the tasks array
+int nextID = 1;       // 5 generate an ID automatically
 Task *tasks;          // ** pointer to tasks array ** //
 
 /* main */
 int main()
 {
-    int choise = 1;
+
+    int choise = 1, res = 0;
 
     // allocate memory for the tasks pointer
     tasks = (Task *)calloc(tasks_length, (sizeof(Task)));
-    if (!tasks)
+
+    if (tasks == NULL)
     {
-        // something to exit program
         printf("\n\033[31m !!!!!!!!!!!!!! Server error !!!!!!!!!!!!! \033[0m\n");
+        choise = 8; // for quit
     };
 
-    // Data for testing
-    seeder();
+    res = readTasks(); // desirialization
+
+    if (res == 404)
+        printf("\n\t\t \033[34m ** Welcome for the first time ** \033[0m \n");
 
     while (choise != 8)
     {
@@ -297,7 +312,8 @@ int main()
                         printf("\033[31m\n\t\t\t-- Titre invalide !! -- \033[0m\n");
                 }
 
-                searchByTitle(search_title);
+                if (searchByTitle(search_title) == 0)
+                    printf("\n\t\t\033[33mNo tache avec ce titre.\033[0m");
 
                 break;
             } // end case 6_2
@@ -345,14 +361,14 @@ int main()
 
         case 8: // Exit (Done)
         {
-            if (saveTasks())
+            if (tasks_length > 1)
             {
+                saveTasks();
                 printf("\n\033[32m \t--> Les donnees enregistrees avec succes <--\033[0m\n");
-                printf("\n\033[34m\t***** A bientot. *****\033[0m\n\n");
                 break;
             }
-            else{
-                choise = 0;
+            else if (tasks_length > 1)
+            {
                 printf("\n\t\033[33mLes donnees ne sont pas enregistrees !!!\n \033[0m");
             }
         }
@@ -361,9 +377,11 @@ int main()
 
     // free pointer
     free(tasks);
+    printf("\n\033[34m\t***** A bientot. *****\033[0m\n\n");
 
     return 0;
 }
+
 
 /* Functions definition */
 // done
@@ -538,29 +556,28 @@ int searchByID(int id)
 }
 
 // done
-void searchByTitle(char search_title[20])
+int searchByTitle(char search_title[20])
 {
     int matched = 0;
     for (int i = 0; i < tasks_length - 1; i++)
     {
-        if (isIn_STR(tasks[i].title, search_title))
+        if (isIn_STR(to_lower(tasks[i].title), to_lower(search_title)))
         {
             displayTask(tasks[i]);
             matched++;
         }
     }
-    if (matched == 0)
-        printf("\n\t\t\033[33mNo tache avec ce titre.\033[0m");
+    return matched;
 }
 
 // done
-void sortByDeadline()
+int sortByDeadline()
 {
-    int min_pos;
+    int min_pos, i;
     Task taskTMP;
     time_t current_t = time(NULL);
 
-    for (int i = 0; i < tasks_length - 2; i++)
+    for (i = 0; i < tasks_length - 2; i++)
     {
         // task[i] deadAfter
         long long int i_deadAfter = mktime(&tasks[i].deadline) - current_t;
@@ -583,30 +600,36 @@ void sortByDeadline()
             memcpy(&tasks[min_pos], &taskTMP, sizeof(Task));
         }
     }
+    if (i == tasks_length - 2) return 1;
+    return 0;
 }
 
 // done
-void sortByTitle()
+int sortByTitle()
 {
-    int min_pos;
+    int min_pos, i;
     Task taskTMP;
-    for (int i = 0; i < tasks_length - 2; i++)
+    for (i = 0; i < tasks_length - 2; i++)
     {
         min_pos = i + 1;
         for (int j = i + 1; j < tasks_length - 1; j++)
         {
-            if (strcmp(tasks[j].title, tasks[min_pos].title) < 0)
+            if (strcmp(to_lower(tasks[j].title), to_lower(tasks[min_pos].title)) < 0)
             {
                 min_pos = j;
             }
         }
-        if (strcmp(tasks[i].title, tasks[min_pos].title) > 0)
+        if (strcmp(to_lower(tasks[i].title), to_lower(tasks[min_pos].title)) > 0)
         {
             memcpy(&taskTMP, &tasks[i], sizeof(Task));
             memcpy(&tasks[i], &tasks[min_pos], sizeof(Task));
             memcpy(&tasks[min_pos], &taskTMP, sizeof(Task));
         }
     }
+    if(i==tasks_length - 2) 
+        return 1;
+    return 0;
+
 }
 
 // done
@@ -615,10 +638,11 @@ int displayTasks(int max_deadline_days)
     int count = 0;
     for (int i = 0; i < tasks_length - 1; i++)
     {
-        count++;
+        
         if (max_deadline_days == 0)
         {
             displayTask(tasks[i]);
+            count++;
             continue;
         }
 
@@ -628,6 +652,7 @@ int displayTasks(int max_deadline_days)
 
         if (deadAfter <= (max_deadline_days * 24 * 3600))
             displayTask(tasks[i]);
+        count++;
     }
     return count;
 }
@@ -990,11 +1015,21 @@ int isNumber(char string[])
     return 1;
 }
 
-// doing
+// done
+char *to_lower(char *string)
+{
+    for (int i = 0; string[i] != '\0'; i++)
+    {
+        string[i] = tolower(string[i]);
+    }
+    return string;
+}
+
+// done
 int saveTasks()
 {
     FILE *myFile;
-    fopen_s(&myFile, "C:/Users/Youcode/Desktop/SAS/YouCode_Projet-Fin-SAS/Tasks.dat", "w");
+    fopen_s(&myFile, "./Tasks.dat", "w");
     if (myFile == NULL)
     {
         printf("\n\t\033[31mErreur: fichier tasks.dat n\'ouvrir pas !! \n\033[0m");
@@ -1004,13 +1039,13 @@ int saveTasks()
     {
         char task__str[300];
 
-        sprintf(task__str, "%d, %s, %s, %d/%d/%d %d:%d:%d, %s, %d/%d/%d %d:%d:%d\n",
+        sprintf(task__str, "%d,%s,%s,%d/%d/%d,%d:%d:%d,%s,%d/%d/%d,%d:%d:%d\n",
                 tasks[i].id,
                 tasks[i].title,
                 tasks[i].description,
-                tasks[i].deadline.tm_mday, tasks[i].deadline.tm_mon, tasks[i].deadline.tm_year, tasks[i].deadline.tm_hour, tasks[i].deadline.tm_min, tasks[i].deadline.tm_sec,
+                tasks[i].deadline.tm_mday, tasks[i].deadline.tm_mon + 1, tasks[i].deadline.tm_year + 1900, tasks[i].deadline.tm_hour, tasks[i].deadline.tm_min, tasks[i].deadline.tm_sec,
                 tasks[i].status,
-                tasks[i].created_at.tm_mday, tasks[i].created_at.tm_mon, tasks[i].created_at.tm_year, tasks[i].created_at.tm_hour, tasks[i].created_at.tm_min, tasks[i].created_at.tm_sec);
+                tasks[i].created_at.tm_mday, tasks[i].created_at.tm_mon + 1, tasks[i].created_at.tm_year + 1900, tasks[i].created_at.tm_hour, tasks[i].created_at.tm_min, tasks[i].created_at.tm_sec);
 
         {
             if (!fwrite(task__str, sizeof(char), strlen(task__str), myFile))
@@ -1020,6 +1055,78 @@ int saveTasks()
             }
         }
     }
+    fclose(myFile);
+    return 1;
+}
+
+// done
+int readTasks()
+{
+    FILE *myFile;
+    fopen_s(&myFile, "./Tasks.dat", "r");
+
+    if (myFile == NULL)
+    { // file doesn't exist
+        return 404;
+    }
+
+    int resOfScan = 0;
+    char task_str[300];
+
+    // Reading from the file
+    while (fgets(task_str, sizeof(task_str), myFile) != NULL)
+    {
+        char title[40], description[200], status[24];
+        int id, deadDay, deadMon, deadYear, deadHour, deadMin, deadSec, createDay, createMon, createYear, createHour, createMin, createSec;
+
+        resOfScan = sscanf_s(task_str, "%d,%39[^,],%199[^,],%02d/%02d/%04d,%02d:%02d:%02d,%23[^,],%02d/%02d/%04d,%02d:%02d:%02d",
+                             &id,
+                             title, sizeof(title),
+                             description, sizeof(title),
+                             &deadDay, &deadMon, &deadYear, &deadHour, &deadMin, &deadSec,
+                             status, sizeof(status),
+                             &createDay, &createMon, &createYear, &createHour, &createMin, &createSec
+                    );
+                    
+        if (resOfScan != 16) continue;
+
+        // allocate memory
+        tasks = (Task *)realloc(tasks, (tasks_length + 1) * sizeof(Task));
+        if (tasks == NULL)
+        {
+            fclose(myFile);
+            printf("\n\033[31m Server error!!\n");
+            return 0;
+        }
+
+        Task task = {
+            .id = id,
+
+            .deadline.tm_year = deadYear - 1900,
+            .deadline.tm_mon = deadMon - 1,
+            .deadline.tm_mday = deadDay,
+            .deadline.tm_hour = deadHour,
+            .deadline.tm_min = deadMin,
+            .deadline.tm_sec = deadSec,
+
+            .created_at.tm_year = createYear - 1900,
+            .created_at.tm_mon = createMon - 1,
+            .created_at.tm_mday = createDay,
+            .created_at.tm_hour = createHour,
+            .created_at.tm_min = createMin,
+            .created_at.tm_sec = createSec,
+
+        };
+        strcpy(task.title, title);
+        strcpy(task.description, description);
+        strcpy(task.status, status);
+
+        memcpy(&(tasks[tasks_length - 1]), &task, sizeof(Task));
+        if(nextID <= id) nextID = id + 1; 
+        tasks_length++;
+    };
+
+    // Close the file
     fclose(myFile);
     return 1;
 }
