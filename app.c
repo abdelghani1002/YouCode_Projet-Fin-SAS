@@ -70,6 +70,7 @@ int main()
         {
             if (addTask(1))
             {
+                saveTasks();
                 printf("\n\t\t\033[32mTache est ajoutee avec succes.\033[0m\n");
             }
             else
@@ -92,6 +93,7 @@ int main()
 
             if (addTask(newTasks_number))
             {
+                saveTasks();
                 printf("\n\t\t\033[32mTaches sont ajoutees avec succes.\033[0m\n");
             }
             else
@@ -186,7 +188,10 @@ int main()
                     break; // go menu
 
                 if (updateTask(index, arg_number))
+                {
+                    saveTasks();
                     displayTask(tasks[index]);
+                }
                 else
                     printf("\n\t\t\033[31m Erreur !! .\033[0m\n");
             }
@@ -218,6 +223,7 @@ int main()
                 }
                 if (deleteTask(index))
                 {
+                    saveTasks();
                     printf("\n\t\t\033[32mTache supprimes avec succes.\033[0m\n");
                 }
                 else
@@ -810,7 +816,7 @@ int addTask(int number)
             int len = strlen(input);
             if (input[len - 1] == '\n')
                 input[len - 1] = '\0';
-            if (sscanf(input, "%02d/%02d/%04d", &day, &month, &year) != 3 || year < 0 || month < 1 || month > 12 || day < 1 || day > 31)
+            if (sscanf(input, "%02d/%02d/%04d", &day, &month, &year) != 3 || year < currentTime.tm_year +1900 || (month < currentTime.tm_mon +1 && year == currentTime.tm_year +1900) || month < 1 || month > 12 || (day <= currentTime.tm_mday && month == currentTime.tm_mon +1 && year == currentTime.tm_year +1900) || day < 1 || day > 31)
             {
                 printf("\033[31m\n\t\t\t-- Date Invalide !! --\033[0m\n");
             }

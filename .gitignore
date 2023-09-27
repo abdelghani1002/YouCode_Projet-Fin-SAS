@@ -3,3 +3,5 @@
 test.c
 tempCodeRunnerFile.c
 *.dat
+*.vscode
+.gitignore
